@@ -12,9 +12,15 @@ async def on_message(message):
     if ('ok marc') in message.content:
         msg = 'ok marc'.format(message)
         await client.send_message(message.channel, msg)
-        voice_channel = message.author.voice_channel
-        await client.join_voice_channel(voice_channel)
-        voice_channel.play(discord.FFmpegPCMAudio('Futbol.mp3'))
+        voice_channel = await client.join_voice_channel(message.author.voice_channel)
+        player = voice_channel.create_ffmpeg_player('Futbol.mp3', after=lambda: print('played it'))
+        player.start()
+        while not player.is_done():
+            await asyncio.sleep(1)
+        player.stop()
+        await voice_channel.disconnect()
+    else:
+        await client.say('cant find that mofo')
         
 
 @client.event
