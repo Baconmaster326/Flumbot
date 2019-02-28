@@ -8,6 +8,7 @@ import eyed3
 client = discord.Client()
 thank = 0
 
+
 @client.event
 async def on_message(message):
     messagetobot = str(message.content)
@@ -80,7 +81,7 @@ async def on_message(message):
             player.stop()
             await voice_channel.disconnect()
         
-    if ('yo') in messagetobot.lower():
+    if ('keep saying that') in messagetobot.lower():
         msg = 'Okay Mr. Phillips'
         await client.send_message(message.channel, msg)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
@@ -170,7 +171,7 @@ async def on_message(message):
         line = u'\u2551' 
         msg = 'My current commands are:\n \n \
         '+ line +'"flum begun" '+ line +' "football" '+ line +' "!help" '+ line +' "pakistan" '+ line +' " lester" '+ line +' "flip coin" '+ line +' "roll dice"'+ line +' \n \
-        '+ line +'"ok marc"'+ line +'"is your refrigerator running?" '+ line +' "yo" '+ line +' "trevor" '+ line +' "tell me a joke" '+ line +' \
+        '+ line +'"ok marc"'+ line +'"is your refrigerator running?" '+ line +' "keep saying that" '+ line +' "trevor" '+ line +' "tell me a joke" '+ line +' \
         \n \n:regional_indicator_n::regional_indicator_i::b::b::a:'
         await client.send_message(message.channel, msg)
         
@@ -184,5 +185,29 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
+    flavortown = random.randint(0,10)
+    if flavortown == 0:
+        await client.change_presence(game=discord.Game(name='Memeing since 1985'))
+    if flavortown == 1:
+        await client.change_presence(game=discord.Game(name='ok marc'))
+    if flavortown == 2:
+        await client.change_presence(game=discord.Game(name='Johnathan Cena'))
+    if flavortown == 3:
+        await client.change_presence(game=discord.Game(name='Watchmojo.com Top 10 Anime Bot Battles'))
+    if flavortown == 4:
+        await client.change_presence(game=discord.Game(name='https://www.youtube.com/watch?v=0gj-RYNhP8Y'))
+    if flavortown == 5:
+        await client.change_presence(game=discord.Game(name='tinyurl.com/godisaliveandicanproveit'))
+    if flavortown == 6:
+        await client.change_presence(game=discord.Game(name=':crab: Fortnite is Gone :crab:'))
+    if flavortown == 7:
+        await client.change_presence(game=discord.Game(name='Windows 98 startup sound'))
+    if flavortown == 8:
+        await client.change_presence(game=discord.Game(name='LESTER CREST YOU ASSHOLE'))
+    if flavortown == 9:
+        await client.change_presence(game=discord.Game(name='Pepperidge Farms remembers'))
+    if flavortown == 10:
+        await client.change_presence(game=discord.Game(name='We are praying for Puerto Rico, Puerto Rico'))
+
 
 client.run('NTQ5OTk2NDI0NDIzNTM4Njg4.D1cDvA.OzgmwGXBMe8HpkhUPt1kbT3DtuA')
