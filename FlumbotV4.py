@@ -4,6 +4,7 @@ import asyncio
 import random
 import time
 import eyed3
+#import big_smoke#
 
 client = discord.Client()
 thank = 0
@@ -102,6 +103,39 @@ async def on_message(message):
         player.stop()
         await voice_channel.disconnect()
 
+    if ('ramsay') in messagetobot.lower():
+        quoteselect = random.randint(0,9)
+        voice_channel = await client.join_voice_channel(message.author.voice_channel)
+        player = voice_channel.create_ffmpeg_player('./Clips/ramsay'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/ramsay'+str(quoteselect)+'.mp3').info.time_secs
+        duration += 1
+        player.start()
+        await asyncio.sleep(duration)
+        player.stop()
+        await voice_channel.disconnect()
+        
+    if ('big smoke') in messagetobot.lower():
+        quoteselect = random.randint(0,3)
+        voice_channel = await client.join_voice_channel(message.author.voice_channel)
+        player = voice_channel.create_ffmpeg_player('./Clips/smoke'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/smoke'+str(quoteselect)+'.mp3').info.time_secs
+        duration += 1
+        player.start()
+        await asyncio.sleep(duration)
+        player.stop()
+        await voice_channel.disconnect()
+        
+    if ('prequel') in messagetobot.lower():
+        quoteselect = random.randint(0,0)
+        voice_channel = await client.join_voice_channel(message.author.voice_channel)
+        player = voice_channel.create_ffmpeg_player('./Clips/prequel'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/prequel'+str(quoteselect)+'.mp3').info.time_secs
+        duration += 1
+        player.start()
+        await asyncio.sleep(duration)
+        player.stop()
+        await voice_channel.disconnect()
+
     if ('agent') in messagetobot.lower():
         quoteselect = random.randint(0,12)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
@@ -193,8 +227,9 @@ async def on_message(message):
         line = u'\u2551' 
         msg = 'My current commands are:\n \n \
         '+ line +'"flum begun" '+ line +' "football" '+ line +' "!help" '+ line +' "pakistan" '+ line +' " lester" '+ line +' "flip coin" '+ line +' "roll dice"'+ line +' \n \
-        '+ line +'"ok marc"'+ line +'"is your refrigerator running?" '+ line +' "keep saying that" '+ line +' "trevor" '+ line +' "tell me a joke" '+ line +' \
-        \n \n:regional_indicator_n::regional_indicator_i::b::b::a:'
+        '+ line +'"ok marc"'+ line +'"is your refrigerator running?"'+ line +' "keep saying that" '+ line +' "trevor" '+ line +' \n         ' + line +' "tell me a joke"'+ line + \
+        '"agent"'+ line +'"spongebob"' + line + '"big smoke"'+line+ '"prequel"'+line+\
+        '\n \n:regional_indicator_n::regional_indicator_i::b::b::a:'
         await client.send_message(message.channel, msg)
         
     else:
@@ -207,30 +242,11 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
+    flavorlist = ['Memeing since 1985', 'ok marc', 'Johnathan Cena', 'Watchmojo.com Top 10 Anime Bot Battles', 'https://www.youtube.com/watch?v=0gj-RYNhP8Y', \
+                  'tinyurl.com/godisaliveandicanproveit', ':crab: Fortnite is Gone :crab:' , 'Windows 98 startup sound', 'LESTER CREST YOU ASSHOLE', \
+                  'Pepperidge Farms remembers', 'We are praying for Puerto Rico, Puerto Rico']
     flavortown = random.randint(0,10)
     rando= int(random.randint(0,3))
-    if flavortown == 0:
-        await client.change_presence(game=discord.Game(name='Memeing since 1985', type=rando))
-    if flavortown == 1:
-        await client.change_presence(game=discord.Game(name='ok marc', type=rando))
-    if flavortown == 2:
-        await client.change_presence(game=discord.Game(name='Johnathan Cena', type=rando))
-    if flavortown == 3:
-        await client.change_presence(game=discord.Game(name='Watchmojo.com Top 10 Anime Bot Battles', type=rando))
-    if flavortown == 4:
-        await client.change_presence(game=discord.Game(name='https://www.youtube.com/watch?v=0gj-RYNhP8Y', type=rando))
-    if flavortown == 5:
-        await client.change_presence(game=discord.Game(name='tinyurl.com/godisaliveandicanproveit', type=rando))
-    if flavortown == 6:
-        await client.change_presence(game=discord.Game(name=':crab: Fortnite is Gone :crab:', type=rando))
-    if flavortown == 7:
-        await client.change_presence(game=discord.Game(name='Windows 98 startup sound', type=rando))
-    if flavortown == 8:
-        await client.change_presence(game=discord.Game(name='LESTER CREST YOU ASSHOLE', type=rando))
-    if flavortown == 9:
-        await client.change_presence(game=discord.Game(name='Pepperidge Farms remembers', type=rando))
-    if flavortown == 10:
-        await client.change_presence(game=discord.Game(name='We are praying for Puerto Rico, Puerto Rico',type=rando))
-
+    await client.change_presence(game=discord.Game(name=flavorlist[flavortown], type=rando))
 
 client.run('NTQ5OTk2NDI0NDIzNTM4Njg4.D1cDvA.OzgmwGXBMe8HpkhUPt1kbT3DtuA')
