@@ -56,7 +56,7 @@ async def on_message(message):
         await client.send_message(message.channel, msg)
         timer = int(random.randint(600,3600))
         print ('waiting ' + str(timer) + ' seconds before surprise')
-        time.sleep(timer)
+        asyncio.sleep(timer)
         surprise = int(timer % 2)
         
         if  surprise == 0:
@@ -91,8 +91,30 @@ async def on_message(message):
         player.stop()
         await voice_channel.disconnect()
         
+    if ('spongebob') in messagetobot.lower():
+        quoteselect = random.randint(0,0)
+        voice_channel = await client.join_voice_channel(message.author.voice_channel)
+        player = voice_channel.create_ffmpeg_player('./Clips/spongebob'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/spongebob'+str(quoteselect)+'.mp3').info.time_secs
+        duration += 1
+        player.start()
+        await asyncio.sleep(duration)
+        player.stop()
+        await voice_channel.disconnect()
+
+    if ('agent') in messagetobot.lower():
+        quoteselect = random.randint(0,12)
+        voice_channel = await client.join_voice_channel(message.author.voice_channel)
+        player = voice_channel.create_ffmpeg_player('./Clips/agent'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/agent'+str(quoteselect)+'.mp3').info.time_secs
+        duration += 1
+        player.start()
+        await asyncio.sleep(duration)
+        player.stop()
+        await voice_channel.disconnect()
+        
     if ('trevor') in messagetobot.lower():
-        quoteselect = random.randint(0,4)
+        quoteselect = random.randint(0,15)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/trevor'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
         duration = eyed3.load('./Clips/trevor'+str(quoteselect)+'.mp3').info.time_secs
@@ -103,7 +125,7 @@ async def on_message(message):
         await voice_channel.disconnect()
         
     if('lester') in messagetobot.lower():
-        quoteselect = random.randint(0,12)
+        quoteselect = random.randint(0,13)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/lester'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
         duration = eyed3.load('./Clips/lester'+str(quoteselect)+'.mp3').info.time_secs
@@ -114,7 +136,7 @@ async def on_message(message):
         await voice_channel.disconnect()
 
     if ('tell me a joke') in messagetobot.lower():
-        quoteselect = random.randint(0,12)
+        quoteselect = random.randint(0,34)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/bonzi'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
         duration = eyed3.load('./Clips/bonzi'+str(quoteselect)+'.mp3').info.time_secs
@@ -186,28 +208,29 @@ async def on_ready():
     print(client.user.id)
     print('------')
     flavortown = random.randint(0,10)
+    rando= int(random.randint(0,3))
     if flavortown == 0:
-        await client.change_presence(game=discord.Game(name='Memeing since 1985'))
+        await client.change_presence(game=discord.Game(name='Memeing since 1985', type=rando))
     if flavortown == 1:
-        await client.change_presence(game=discord.Game(name='ok marc'))
+        await client.change_presence(game=discord.Game(name='ok marc', type=rando))
     if flavortown == 2:
-        await client.change_presence(game=discord.Game(name='Johnathan Cena'))
+        await client.change_presence(game=discord.Game(name='Johnathan Cena', type=rando))
     if flavortown == 3:
-        await client.change_presence(game=discord.Game(name='Watchmojo.com Top 10 Anime Bot Battles'))
+        await client.change_presence(game=discord.Game(name='Watchmojo.com Top 10 Anime Bot Battles', type=rando))
     if flavortown == 4:
-        await client.change_presence(game=discord.Game(name='https://www.youtube.com/watch?v=0gj-RYNhP8Y'))
+        await client.change_presence(game=discord.Game(name='https://www.youtube.com/watch?v=0gj-RYNhP8Y', type=rando))
     if flavortown == 5:
-        await client.change_presence(game=discord.Game(name='tinyurl.com/godisaliveandicanproveit'))
+        await client.change_presence(game=discord.Game(name='tinyurl.com/godisaliveandicanproveit', type=rando))
     if flavortown == 6:
-        await client.change_presence(game=discord.Game(name=':crab: Fortnite is Gone :crab:'))
+        await client.change_presence(game=discord.Game(name=':crab: Fortnite is Gone :crab:', type=rando))
     if flavortown == 7:
-        await client.change_presence(game=discord.Game(name='Windows 98 startup sound'))
+        await client.change_presence(game=discord.Game(name='Windows 98 startup sound', type=rando))
     if flavortown == 8:
-        await client.change_presence(game=discord.Game(name='LESTER CREST YOU ASSHOLE'))
+        await client.change_presence(game=discord.Game(name='LESTER CREST YOU ASSHOLE', type=rando))
     if flavortown == 9:
-        await client.change_presence(game=discord.Game(name='Pepperidge Farms remembers'))
+        await client.change_presence(game=discord.Game(name='Pepperidge Farms remembers', type=rando))
     if flavortown == 10:
-        await client.change_presence(game=discord.Game(name='We are praying for Puerto Rico, Puerto Rico'))
+        await client.change_presence(game=discord.Game(name='We are praying for Puerto Rico, Puerto Rico',type=rando))
 
 
 client.run('NTQ5OTk2NDI0NDIzNTM4Njg4.D1cDvA.OzgmwGXBMe8HpkhUPt1kbT3DtuA')
