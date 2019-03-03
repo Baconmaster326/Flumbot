@@ -91,6 +91,17 @@ async def on_message(message):
         await asyncio.sleep(124)
         player.stop()
         await voice_channel.disconnect()
+
+    if ('tell me a fact') in messagetobot.lower():
+        quoteselect = random.randint(0,4)
+        voice_channel = await client.join_voice_channel(message.author.voice_channel)
+        player = voice_channel.create_ffmpeg_player('./Clips/fact'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/fact'+str(quoteselect)+'.mp3').info.time_secs
+        duration += 1
+        player.start()
+        await asyncio.sleep(duration)
+        player.stop()
+        await voice_channel.disconnect()
         
     if ('spongebob') in messagetobot.lower():
         quoteselect = random.randint(0,0)
@@ -104,7 +115,7 @@ async def on_message(message):
         await voice_channel.disconnect()
 
     if ('ramsay') in messagetobot.lower():
-        quoteselect = random.randint(0,9)
+        quoteselect = random.randint(0,50)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/ramsay'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
         duration = eyed3.load('./Clips/ramsay'+str(quoteselect)+'.mp3').info.time_secs
@@ -126,7 +137,7 @@ async def on_message(message):
         await voice_channel.disconnect()
         
     if ('prequel') in messagetobot.lower():
-        quoteselect = random.randint(0,0)
+        quoteselect = random.randint(0,57)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/prequel'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
         duration = eyed3.load('./Clips/prequel'+str(quoteselect)+'.mp3').info.time_secs
