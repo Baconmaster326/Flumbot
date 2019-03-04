@@ -101,6 +101,18 @@ async def on_message(message):
         player.stop()
         await voice_channel.disconnect()
 
+    if ('chum') in messagetobot.lower():
+        msg = "You've been gnomed!"
+        await client.send_message(message.channel, msg)
+        voice_channel = await client.join_voice_channel(message.author.voice_channel)
+        player = voice_channel.create_ffmpeg_player('./Clips/gnome.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/gnome.mp3').info.time_secs
+        duration += 1
+        player.start()
+        await asyncio.sleep(duration)
+        player.stop()
+        await voice_channel.disconnect()
+
     if ('tell me a fact') in messagetobot.lower():
         quoteselect = random.randint(0,4)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
@@ -260,7 +272,7 @@ async def on_message(message):
         msg = 'My current commands are:\n \n \
         '+ line +'"flum begun" '+ line +' "football" '+ line +' "!help" '+ line +' "pakistan" '+ line +' " lester" '+ line +' "flip coin" '+ line +' "roll dice"'+ line +' \n \
         '+ line +'"ok marc"'+ line +'"is your refrigerator running?"'+ line +' "keep saying that" '+ line +' "trevor" '+ line +' \n         ' + line +' "tell me a joke"'+ line + \
-        '"agent"'+ line +'"spongebob"' + line + '"big smoke"'+line+ '"prequel"'+line+'"bet"'+line+'"ramsay"'+line+'\n         '+line+'"tell me a fact"'+line+\
+        '"agent"'+ line +'"spongebob"' + line + '"big smoke"'+line+ '"prequel"'+line+'"bet"'+line+'"ramsay"'+line+'\n         '+line+'"tell me a fact"'+line+'"chum"'+line+\
         '\n \n:regional_indicator_n::regional_indicator_i::b::b::a:'
         await client.send_message(message.channel, msg)
         
