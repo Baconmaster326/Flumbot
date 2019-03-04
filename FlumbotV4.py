@@ -8,7 +8,7 @@ import eyed3
 
 client = discord.Client()
 thank = 0
-
+forbidden = ['football','spongebob','big smoke', 'good bot', 'bet']
 
 @client.event
 async def on_message(message):
@@ -35,7 +35,14 @@ async def on_message(message):
             player.stop()
             #leave voice channel
             await voice_channel.disconnect()
-            
+
+    if ('bet') in messagetobot.lower():
+        wager = ['1 million doll hairs.', 'my diabetic cat photo collection.', 'my love for Jesus Christ.', 'my Kuruma.', 'Marc dying on the next Act 3.', \
+                 'Ratbuddy hating my code.', 'listening to Bonzi Buddy Jokes for 10 years.']
+        wagerslt = random.randint(0,7)
+        msg = "I'll wager " +str(wager[wagerslt])
+        await client.send_message(message.channel, msg)
+
     if ('is your refrigerator running') in messagetobot.lower():
         msg = 'Yes'
         await client.send_message(message.channel, msg)
@@ -47,8 +54,10 @@ async def on_message(message):
         await voice_channel.disconnect()
 
     if ('good bot') in messagetobot.lower():
+        thank = 0
+        thanker = thank + 1
         thank += 1
-        msg = 'Thank you are the ' + str(thank) + 'th person to thank me. :feelsgoodman:'
+        msg = 'Thank you are the ' + str(thanker) + 'th person to thank me. :feelsgoodman:'
         await client.send_message(message.channel, msg)
         
     #update quoteselect if you have new quotes        
@@ -231,6 +240,18 @@ async def on_message(message):
         await asyncio.sleep(122)
         player.stop()
         await voice_channel.disconnect()
+
+    if ('b') in messagetobot.lower():
+        if messagetobot in forbidden:
+            print('thats a negative')
+            return
+        msg = 'Its :b:o time'
+        frythis = 'b'
+        await client.send_message(message.channel, msg)
+        if frythis in messagetobot:
+            msg = messagetobot
+            msg2 = msg.replace('b',':b:') + '\n yeet'
+            await client.send_message(message.channel, msg2)
         
 
     #update if you have new commands
@@ -239,7 +260,7 @@ async def on_message(message):
         msg = 'My current commands are:\n \n \
         '+ line +'"flum begun" '+ line +' "football" '+ line +' "!help" '+ line +' "pakistan" '+ line +' " lester" '+ line +' "flip coin" '+ line +' "roll dice"'+ line +' \n \
         '+ line +'"ok marc"'+ line +'"is your refrigerator running?"'+ line +' "keep saying that" '+ line +' "trevor" '+ line +' \n         ' + line +' "tell me a joke"'+ line + \
-        '"agent"'+ line +'"spongebob"' + line + '"big smoke"'+line+ '"prequel"'+line+\
+        '"agent"'+ line +'"spongebob"' + line + '"big smoke"'+line+ '"prequel"'+line+'"bet"'+line+'"ramsay"'+line+'\n         '+line+'"tell me a fact"'+line+\
         '\n \n:regional_indicator_n::regional_indicator_i::b::b::a:'
         await client.send_message(message.channel, msg)
         
