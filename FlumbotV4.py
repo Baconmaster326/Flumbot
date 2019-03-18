@@ -38,14 +38,15 @@ async def on_message(message):
 
     if ('bet') in messagetobot.lower():
         wager = ['1 million doll hairs.', 'my diabetic cat photo collection.', 'my love for Jesus Christ.', 'my Kuruma.', 'Marc dying on the next Act 3.', \
-                 'Ratbuddy hating my code.', 'listening to Bonzi Buddy Jokes for 10 years.']
-        wagerslt = random.randint(0,7)
-        msg = "I'll wager " +str(wager[wagerslt])
-        await client.send_message(message.channel, msg)
+                 'ratbuddy hating my code.', 'listening to Bonzi Buddy Jokes for 10 years.', 'Ratbuddy wanting more functions', 'Ratbuddy saying somthing about JSON',\
+                 'water being the #1 cause of cancer', 'DJ Khaled is the messiah', 'Rhinehart knows', 'Emoji Movie 2 gets confirmed for 2020']
+        wagerslt = random.randint(0,12)
+        msg = "I'll bet " +str(wager[wagerslt])
+        await client.send_message(message.channel, msg, tts=True)
 
     if ('is your refrigerator running') in messagetobot.lower():
         msg = 'Yes'
-        await client.send_message(message.channel, msg)
+        await client.send_message(message.channel, msg, tts=True)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/oof.mp3', after=lambda: print('played it'))
         player.start()
@@ -58,12 +59,12 @@ async def on_message(message):
         thanker = thank + 1
         thank += 1
         msg = 'Thank you are the ' + str(thanker) + 'th person to thank me. :feelsgoodman:'
-        await client.send_message(message.channel, msg)
+        await client.send_message(message.channel, msg, tts=True)
         
     #update quoteselect if you have new quotes        
     if ('flum begun') in messagetobot.lower():
         msg = '@everyone It must be Flum time'
-        await client.send_message(message.channel, msg)
+        await client.send_message(message.channel, msg, tts=True)
         timer = int(random.randint(600,3600))
         print ('waiting ' + str(timer) + ' seconds before surprise')
         asyncio.sleep(timer)
@@ -93,7 +94,7 @@ async def on_message(message):
         
     if ('keep saying that') in messagetobot.lower():
         msg = 'Okay Mr. Phillips'
-        await client.send_message(message.channel, msg)
+        await client.send_message(message.channel, msg, tts=True)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/trevor.mp3', after=lambda: print('played it'))
         player.start()
@@ -103,10 +104,20 @@ async def on_message(message):
 
     if ('chum') in messagetobot.lower():
         msg = "You've been gnomed!"
-        await client.send_message(message.channel, msg)
+        await client.send_message(message.channel, msg, tts=True)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/gnome.mp3', after=lambda: print('played it'))
         duration = eyed3.load('./Clips/gnome.mp3').info.time_secs
+        duration += 1
+        player.start()
+        await asyncio.sleep(duration)
+        player.stop()
+        await voice_channel.disconnect()
+
+    if ('clap') in messagetobot.lower():
+        voice_channel = await client.join_voice_channel(message.author.voice_channel)
+        player = voice_channel.create_ffmpeg_player('./Clips/clap.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/clap.mp3').info.time_secs
         duration += 1
         player.start()
         await asyncio.sleep(duration)
@@ -136,7 +147,7 @@ async def on_message(message):
         await voice_channel.disconnect()
 
     if ('ramsay') in messagetobot.lower():
-        quoteselect = random.randint(0,50)
+        quoteselect = random.randint(0,56)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/ramsay'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
         duration = eyed3.load('./Clips/ramsay'+str(quoteselect)+'.mp3').info.time_secs
@@ -211,10 +222,42 @@ async def on_message(message):
         await asyncio.sleep(duration)
         player.stop()
         await voice_channel.disconnect()
+
+    if ('thomas') in messagetobot.lower():
+        voice_channel = await client.join_voice_channel(message.author.voice_channel)
+        player = voice_channel.create_ffmpeg_player('./Clips/thomas.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/thomas.mp3').info.time_secs
+        duration += 1
+        player.start()
+        await asyncio.sleep(duration)
+        player.stop()
+        await voice_channel.disconnect()
+
+    if ('alex jones') in messagetobot.lower():
+        quoteselect = random.randint(0,91)
+        voice_channel = await client.join_voice_channel(message.author.voice_channel)
+        player = voice_channel.create_ffmpeg_player('./Clips/alex'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/alex'+str(quoteselect)+'.mp3').info.time_secs
+        duration += 1
+        player.start()
+        await asyncio.sleep(duration)
+        player.stop()
+        await voice_channel.disconnect()
+
+    if ('trump') in messagetobot.lower():
+        quoteselect = random.randint(0,0)
+        voice_channel = await client.join_voice_channel(message.author.voice_channel)
+        player = voice_channel.create_ffmpeg_player('./Clips/trump'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/trump'+str(quoteselect)+'.mp3').info.time_secs
+        duration += 1
+        player.start()
+        await asyncio.sleep(duration)
+        player.stop()
+        await voice_channel.disconnect()
         
     if ('ok marc') in messagetobot.lower():
         msg = 'ok marc'
-        await client.send_message(message.channel,msg)
+        await client.send_message(message.channel,msg,tts=True)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/ok.mp3', after=lambda: print('played it'))
         player.start()
@@ -225,15 +268,15 @@ async def on_message(message):
     if ('roll dice') in messagetobot.lower():
         rand = random.randint(1,6)
         msg = 'Rolling...'
-        await client.send_message(message.channel, msg)
+        await client.send_message(message.channel, msg, tts=True)
         time.sleep(2)
         msg = 'You rolled a ' + str(rand)
-        await client.send_message(message.channel, msg)
+        await client.send_message(message.channel, msg, tts=True)
         
     if ('flip coin') in messagetobot.lower():
         rand = random.randint(0,1)
         msg = 'Flipping...'
-        await client.send_message(message.channel, msg)
+        await client.send_message(message.channel, msg, tts=True)
         time.sleep(2)
         
         if rand == 0:
@@ -241,11 +284,11 @@ async def on_message(message):
         else:
             msg = 'Coin lands on tails'
             
-        await client.send_message(message.channel, msg)
+        await client.send_message(message.channel, msg, tts=True)
     
     if('pakistan') in messagetobot.lower():
         msg = 'MY FRIENDS!'
-        await client.send_message(message.channel, msg)
+        await client.send_message(message.channel, msg, tts=True)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/lester.mp3', after=lambda: print('played it'))
         player.start()
@@ -253,17 +296,17 @@ async def on_message(message):
         player.stop()
         await voice_channel.disconnect()
 
-    if ('b') in messagetobot.lower():
+    if ('barrus benson') in messagetobot.lower():
         if messagetobot in forbidden:
             print('thats a negative')
             return
         msg = 'Its :b:o time'
         frythis = 'b'
-        await client.send_message(message.channel, msg)
+        await client.send_message(message.channel, msg, tts=True)
         if frythis in messagetobot:
             msg = messagetobot
-            msg2 = msg.replace('b',':b:') + '\n yeet'
-            await client.send_message(message.channel, msg2)
+            msg2 = msg.replace('b',':b:')
+            await client.send_message(message.channel, msg2, tts=True)
         
 
     #update if you have new commands
@@ -273,6 +316,7 @@ async def on_message(message):
         '+ line +'"flum begun" '+ line +' "football" '+ line +' "!help" '+ line +' "pakistan" '+ line +' " lester" '+ line +' "flip coin" '+ line +' "roll dice"'+ line +' \n \
         '+ line +'"ok marc"'+ line +'"is your refrigerator running?"'+ line +' "keep saying that" '+ line +' "trevor" '+ line +' \n         ' + line +' "tell me a joke"'+ line + \
         '"agent"'+ line +'"spongebob"' + line + '"big smoke"'+line+ '"prequel"'+line+'"bet"'+line+'"ramsay"'+line+'\n         '+line+'"tell me a fact"'+line+'"chum"'+line+\
+        '"barrus benson"'+line+'"trump"'+line+'"thomas"'+line+'"alex jones"'+line+'"clap"'+line+\
         '\n \n:regional_indicator_n::regional_indicator_i::b::b::a:'
         await client.send_message(message.channel, msg)
         
@@ -288,8 +332,9 @@ async def on_ready():
     print('------')
     flavorlist = ['Memeing since 1985', 'ok marc', 'Johnathan Cena', 'Watchmojo.com Top 10 Anime Bot Battles', 'https://www.youtube.com/watch?v=0gj-RYNhP8Y', \
                   'tinyurl.com/godisaliveandicanproveit', ':crab: Fortnite is Gone :crab:' , 'Windows 98 startup sound', 'LESTER CREST YOU ASSHOLE', \
-                  'Pepperidge Farms remembers', 'We are praying for Puerto Rico, Puerto Rico']
-    flavortown = random.randint(0,10)
+                  'Pepperidge Farms remembers', 'We are praying for Puerto Rico, Puerto Rico', 'Shaq has The General Insurance', 'Kanye 2020', 'Marco Polo','Jesus Christ'\
+                  'Chidlers guitar ;)', 'SmartShart', 'Belgium, which is basically a non-country', 'Buying a car today', 'High wuality midis']
+    flavortown = random.randint(0,19)
     rando= int(random.randint(0,3))
     await client.change_presence(game=discord.Game(name=flavorlist[flavortown], type=rando))
 
