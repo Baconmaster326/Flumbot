@@ -18,30 +18,31 @@ async def on_message(message):
         return
     #command required for clip
     if ('football') in messagetobot.lower():
-        #create reply back with 'ok marc'
-        msg = 'HI EVERYONE AND WELCOME TO JOHN MADDEN FOOTBALL!!!'.format(message)
-        #send msg and await result
-        await client.send_message(message.channel, msg)
-        #set voice channel to join (the message senders voice channel)
+        #set message for text chat to be 'HEY EVERYONE...'
+        msg = "HI EVERYONE AND WELCOME TO JOHN MADDEN FOOTBALL!!!"
+        #send message to text chat in tts
+        await client.send_message(message.channel, msg, tts=True)
+        #set voice channel to message author's voice channel
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
-        #create a ffmpeg player to play 'Futbol.mp3' after creating, print played it in console
+        #load clip and create media player
         player = voice_channel.create_ffmpeg_player('./Clips/Futbol.mp3', after=lambda: print('played it'))
-        #start music in voice channel
+        #get duration of song
+        duration = eyed3.load('./Clips/Futbol.mp3').info.time_secs
+        duration += 1
+        #start player
         player.start()
-        while not player.is_done():
-            #timer before leaving (duration of clip)
-            await asyncio.sleep(13)
-            #stop player after leaving
-            player.stop()
-            #leave voice channel
-            await voice_channel.disconnect()
+        await asyncio.sleep(duration)
+        #play song for duration + 1 secs and stop
+        player.stop()
+        #leave voice channel
+        await voice_channel.disconnect()
 
     if ('bet') in messagetobot.lower():
         wager = ['1 million doll hairs.', 'my diabetic cat photo collection.', 'my love for Jesus Christ.', 'my Kuruma.', 'Marc dying on the next Act 3.', \
                  'ratbuddy hating my code.', 'listening to Bonzi Buddy Jokes for 10 years.', 'Ratbuddy wanting more functions', 'Ratbuddy saying somthing about JSON',\
                  'water being the #1 cause of cancer', 'DJ Khaled is the messiah', 'Rhinehart knows', 'Emoji Movie 2 gets confirmed for 2020']
-        wagerslt = random.randint(0,12)
-        msg = "I'll bet " +str(wager[wagerslt])
+        wagerslt = str(random.choice(wager))
+        msg = "I'll bet " + wagerslt
         await client.send_message(message.channel, msg, tts=True)
 
     if ('is your refrigerator running') in messagetobot.lower():
@@ -97,8 +98,10 @@ async def on_message(message):
         await client.send_message(message.channel, msg, tts=True)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/trevor.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/trevor.mp3').info.time_secs
+        duration += 1
         player.start()
-        await asyncio.sleep(124)
+        await asyncio.sleep(duration)
         player.stop()
         await voice_channel.disconnect()
 
@@ -136,7 +139,7 @@ async def on_message(message):
         await voice_channel.disconnect()
         
     if ('spongebob') in messagetobot.lower():
-        quoteselect = random.randint(0,0)
+        quoteselect = random.randint(0,25)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/spongebob'+str(quoteselect)+'.mp3', after=lambda: print('played it'))
         duration = eyed3.load('./Clips/spongebob'+str(quoteselect)+'.mp3').info.time_secs
@@ -165,8 +168,8 @@ async def on_message(message):
         wager = ['thou shall not take the lords name in vain', 'you called', 'its your friend Simeon', 'who?', 'bow down to the king of Los Santos',\
                  'bet you cannot pickle these plums', ':crab:', 'Jesus Christ its Jason Bourne', 'knock knock', 'FBI OPEN UP', 'this is the Krusty Krab, may I take your order',\
                  'then to Mustafar we must go', 'Coruscant the Capital of the Rebuplic, the entire planet is one big city']
-        wagerslt = random.randint(0,12)
-        msg = str(wager[wagerslt])
+        wagerslt = str(random.choice(wager))
+        msg = wagerslt
         await client.send_message(message.channel, msg, tts=True)
                                   
     if ('big smoke') in messagetobot.lower():
@@ -303,8 +306,10 @@ async def on_message(message):
         await client.send_message(message.channel, msg, tts=True)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
         player = voice_channel.create_ffmpeg_player('./Clips/lester.mp3', after=lambda: print('played it'))
+        duration = eyed3.load('./Clips/lester.mp3').info.time_secs
+        duration += 1
         player.start()
-        await asyncio.sleep(122)
+        await asyncio.sleep(duration)
         player.stop()
         await voice_channel.disconnect()
 
@@ -346,8 +351,8 @@ async def on_ready():
                   'tinyurl.com/godisaliveandicanproveit', ':crab: Fortnite is Gone :crab:' , 'Windows 98 startup sound', 'LESTER CREST YOU ASSHOLE', \
                   'Pepperidge Farms remembers', 'We are praying for Puerto Rico, Puerto Rico', 'Shaq has The General Insurance', 'Kanye 2020', 'Marco Polo','Jesus Christ'\
                   'Chidlers guitar ;)', 'SmartShart', 'Belgium, which is basically a non-country', 'Buying a car today', 'High wuality midis']
-    flavortown = random.randint(0,19)
+    flavortown = str(random.choice(flavorlist))
     rando= int(random.randint(0,3))
-    await client.change_presence(game=discord.Game(name=flavorlist[flavortown], type=rando))
+    await client.change_presence(game=discord.Game(name=flavortown, type=rando))
 
 client.run('NTQ5OTk2NDI0NDIzNTM4Njg4.D1cDvA.OzgmwGXBMe8HpkhUPt1kbT3DtuA')
