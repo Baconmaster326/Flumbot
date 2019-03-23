@@ -156,7 +156,19 @@ async def on_message(message):
         await asyncio.sleep(duration)
         player.stop()
         await voice_channel.disconnect()
-        
+
+    if ('http') in messagetobot.lower():
+        msg = 'nice'
+        await client.send_message(message.channel,msg,tts=True)
+
+    if ('flumbot') in messagetobot.lower():
+        wager = ['thou shall not take the lords name in vain', 'you called', 'its your friend Simeon', 'who?', 'bow down to the king of Los Santos',\
+                 'bet you cannot pickle these plums', ':crab:', 'Jesus Christ its Jason Bourne', 'knock knock', 'FBI OPEN UP', 'this is the Krusty Krab, may I take your order',\
+                 'then to Mustafar we must go', 'Coruscant the Capital of the Rebuplic, the entire planet is one big city']
+        wagerslt = random.randint(0,12)
+        msg = str(wager[wagerslt])
+        await client.send_message(message.channel, msg, tts=True)
+                                  
     if ('big smoke') in messagetobot.lower():
         quoteselect = random.randint(0,3)
         voice_channel = await client.join_voice_channel(message.author.voice_channel)
