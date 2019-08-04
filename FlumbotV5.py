@@ -9,7 +9,7 @@ from discord.ext import commands
 #import big_smoke#
 
 client = discord.Client()
-thank = 0
+thank_count = 0
 forbidden = ['football','spongebob','big smoke', 'good bot', 'bet', 'bible']
 ibnore = ['between', 'better']
 
@@ -81,10 +81,8 @@ async def on_message(message):
         return
 
     if ('good bot') in messagetobot.lower():
-        thank = 0
-        thanker = thank + 1
-        thank += 1
-        msg = 'Thank you are the ' + str(thanker) + 'th person to thank me. :feelsgoodman:'
+        thank_count += 1
+        msg = 'Thank you are the ' + str(thank_count) + 'th person to thank me. :feelsgoodman:'
         await client.send_message(message.channel, msg, tts=True)
         time.sleep (10)
                 
