@@ -364,6 +364,7 @@ async def MidiMania(ctx):
     B = ' '
     C = ' '
     D = ' '
+    #Garbage follows, rewrite this to use random sample instead of random.choice with a bunch of duplicate checking
     if (select == 1):
         A = str(person)
         answer = '\U0001F1E6'
@@ -451,10 +452,13 @@ async def MidiMania(ctx):
         await message.channel.send(file=discord.File('./Pics/beef.png'))
     if ('ratbuddy#9913' in winners):
         await message.channel.send(file=discord.File('./Pics/ratto.png'))
+    # why is this an elif? shadow should be treated like everyone else.. also rewrite to use a list of players
+    # instead of hardcoding everyone
     elif ('ShadowXII#7240' in winners):
         await message.channel.send(file=discord.File('./Pics/horse.png'))
     #elif winners:
         #await ctx.send('\n'.join(map(str, winners)))
+    # next should not be an else, should be an if that checks count of winners
     else:
         await message.channel.send(file=discord.File('./Pics/flumbus.png'))
     msg = "\n:clap::clap::clap::clap::clap::clap:\n"
