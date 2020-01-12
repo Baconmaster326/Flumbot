@@ -8,6 +8,9 @@ import pickle
 import string
 import librosa
 import urllib.request
+import datetime
+import re
+import schedule
 from itertools import cycle
 from discord.ext import commands
 from discord import FFmpegPCMAudio
@@ -16,15 +19,21 @@ from sys import argv
 from os import system
 from urllib.error import HTTPError
 from random import choice
+from datetime import date
 #import big_smoke#
 #import mad marc#
 
-token = 'NTQ5OTk2NDI0NDIzNTM4Njg4.XaoWXw.n3ogBoE-kuyuOhxvRahKreL72ig'
+today = date.today()
+now = datetime.datetime.now()
+token = 'NTQ5OTk2NDI0NDIzNTM4Njg4.Xa5wag.65OhPogV4EGoncB5tUVnqSKdUSA'
 client = commands.Bot(command_prefix = '', case_insensitive = True, )
-
 thankin = open("thank.pickle" , "rb")
 thank = int(pickle.load(thankin))
 thankin.close()
+x = 0
+pilot = 0
+winners = []
+answer = ':a:'
 
 #Things flumbot does on startup
 @client.event
@@ -39,7 +48,9 @@ async def on_ready():
                   'Pepperidge Farms remembers', 'We are praying for Puerto Rico, Puerto Rico', 'Shaq has The General Insurance', 'Kanye 2020', 'Marco Polo','Jesus Christ',\
                   'Chidlers guitar ;)', 'SmartShart', 'Belgium, which is basically a non-country', 'Buying a car today', 'High wuality midis', 'Spreadsheet simulator', 'Onion Knight',\
                   'Game of Thrones Season 8', 'HentaiHaven.org', 'http://nooooooooooooooo.com', 'dad', 'Slapchat' , 'https://tinyurl.com/Godisheretoday' ,'https://tinyurl.com/goodideasinhumanhistory (NSFW)',\
-                  'https://tinyurl.com/hyperintelligentAI', 'marc cannot mute this']
+                  'https://tinyurl.com/hyperintelligentAI', 'marc cannot mute this', 'self destruct code is 8675309', 'hi marc', 'hi rat', 'hi niche', 'hello rhinehart', 'Guess that MIDI, a family classic since 1985'\
+                  'FDR had polio lol', 'Flumbot has 2020 vision in 2020', 'Flumbot for President', "Throwback to when Marc's wife almost ruined flum", 'Pizza Time', 'Marco Fletcher', 'HA', \
+                  'Dark Souls', 'World of Warcraf' , 'World O Tank' , 'World O War']
     flavortown = str(random.choice(flavorlist))
     rando= int(random.randint(0,3))
     await client.change_presence(activity=discord.Game(name=flavortown, type=rando))
@@ -50,15 +61,32 @@ async def on_ready():
                  '"I like flumbot he is so funny" - Nobody', 'Have I gone too far?', 'Fill out this survey to help us better understand how this bot could be improved \n https://www.strawpoll.me/18423333','Guess who',
                  'Marc has me muted :(','Riot','*naruto run*','OwO wuts twis', 'Uwu awake from a long slumber', 'Good morning Donald Trump, United States President number 44', 'Shoutouts to SimpleFlips',
                  'Throwback to LOLwut Pear','Checkout my obby course https://tinyurl.com/niceoneniche', 'This one is for the boys https://www.youtube.com/watch?v=26nnZSjtSqg', 'God was here','this makes marc mad', 'nice one marc'\
-                 'shoutout to marc','marc turn on text commands','take these functions rat','bout to throw hands']          
+                 'shoutout to marc','marc turn on text commands','take these functions rat','bout to throw hands', '88630', 'Austria is on Fire', 'Marc lives in Australia', \
+                 'Oh boy here we go again', 'Pickle Rick', 'Am I real?', 'Shoutout to Midimania the number one gameshow on GSN', 'Ben Gleib is Syndrome', 'Lester is more successful with women than me :(', \
+                 'Creepy Uncle Lester ;)']          
     msg = str(random.choice(awakelist))
     
     channel = client.get_channel(137921870010777600)
-    #await channel.send(msg)
+    await channel.send(msg)
+    d0 = date(2019, 2 , 26)
+    d1 = today
+    start  = d1 - d0
+    
+    if ((int(start.days)%365) == 0):
+        x = int(start.days)
+        while (x != 0):
+            await asyncio.sleep(2)
+            msg = "HAPPY FLUM YEAR\nGIVE IT UP FOR " + str((int(start.days)/365)) + " YEAR(s) OF FLUMBOT!!!\n"
+            await channel.send(msg,tts=True)
+            x -= 1
+            
+    msg = "Give it up for Day " + str(start.days) + "! Day " + str(start.days) + "!"
+    await channel.send(msg)
+    
 
 
-    if len(argv) > 1:
-            open = True
+    #if len(argv) > 1:
+            #open = True
 
     opener = urllib.request.build_opener()
     opener.add_headers = [("User-agent", "Mozilla/5.0")]
@@ -76,7 +104,7 @@ async def on_ready():
                     opener.open(url)
                     print(url)
                     msg = "||" + url + "||"
-                    #await channel.send(msg)
+                    await channel.send(msg)
                     return
                     if open:
                             system("open " + url)
@@ -91,6 +119,16 @@ async def on_message_delete(message):
     msg = 'Ladies and gentlemen, ' + '@' + author + " said, " + \
                content + ", which they promptly deleted. Making them tonight's biggest loser"
     await message.channel.send(msg)
+
+@client.event
+async def on_reaction_add(reaction, user):
+    global winners
+    global answer
+    if (str(user) == 'Flumbot#1927'):
+        return
+    print(str(user))
+    if (answer == reaction.emoji):
+        winners.append(str(user))
 
 @client.event
 async def on_message(message):
@@ -110,8 +148,10 @@ async def on_message(message):
 
     #dad-joke iniator boo-hoo marc got mega sad, re enable at some point
     if "i'm" in betcheck:
-        dad = messagetobot.replace("I'm",'')
-        msg = "Hi," + dad + ", I'm Flumbot, nice to meet you :)"
+        line = messagetobot.lower()
+        dad = line.split()
+        nextword = dad[dad.index("i'm")+1]
+        msg = "Hi, " + str(nextword) + ", I'm Flumbot, nice to meet you :)"
         await message.channel.send(msg)
         time.sleep (10)
 
@@ -214,17 +254,9 @@ async def on_message(message):
 
     #Do you have a clear vision?
     if ('i see') in messagetobot.lower():
-        channel = client.get_channel(137921870010777600)
-        file = discord.File('./Pics/doyou.png' , filename="doyou.png")
-        embed = discord.Embed()
-        embed.set_image(url="attachment://doyou.png")
-        await channel.send(file = file, embed = embed)
-        file = discord.File('./Pics/hedo.png' , filename="hedo.png")
-        embed = discord.Embed()
-        embed.set_image(url="attachment://hedo.png")
-        time.sleep(5)
-        await channel.send(file = file, embed = embed)
-        time.sleep(10)
+        await message.channel.send(file=discord.File('./Pics/doyou.png'))
+        await asyncio.sleep(5)
+        await message.channel.send(file=discord.File('./Pics/hedo.png'))
 
     #never forget when :b: was standard
     if ('b-time') in messagetobot.lower():
@@ -259,6 +291,16 @@ async def on_message(message):
             
         await message.channel.send(msg, tts=True)
 
+    if ('trigger self destruct flumbot code 8675309') in messagetobot.lower():
+        msg = '\n Type cancel to cancel the self destruct! \n'
+        await message.channel.send(msg, tts=True)
+        msg = ':rage: :100: :ok_hand:'
+        global x
+        x = 1
+        while x > 0:
+            await message.channel.send(msg, tts=True)
+            x += 1
+
     print("No specific phrases said, proceed to read commands")
     await client.process_commands(message)
 
@@ -273,7 +315,7 @@ async def on_message(message):
     
 @client.command(pass_context=True, name = 'football', help ='The new John Madden game sounds pretty good.')
 @commands.cooldown(1,10,commands.BucketType.user)
-async def football(ctx):
+async def football(ctx):    
     msg = "HI EVERYONE AND WELCOME TO JOHN MADDEN FOOTBALL!!!"
     await ctx.send(msg)
     cliplocation = './Clips/Futbol.mp3'
@@ -293,10 +335,157 @@ async def football(ctx):
     player = voice.stop()
     await ctx.voice_client.disconnect()
 
+@client.command(pass_context=True, name = 'MidiMania', help ='The hit new game hosted by yours truly')
+@commands.cooldown(1,10,commands.BucketType.user)
+async def MidiMania(ctx):    
+    msg = "It's time to guess that Midi!\nYou'll have 30 seconds to pick the correct song from 4 choices\nPICK ONLY ONE TIME"
+    await ctx.send(msg, tts = True)
+    await asyncio.sleep(10)
+    person = str(random.choice(os.listdir('./Clips/MIDI/')))
+    cliplocation = './Clips/MIDI/' + person
+    duration = 30
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild=ctx.guild)
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
+    source = FFmpegPCMAudio(cliplocation)
+    source = discord.PCMVolumeTransformer(source)
+    source.volume = 1.5
+    player = voice.play(source)
+    await asyncio.sleep(duration)
+    player = voice.stop()
+    await ctx.voice_client.disconnect()
+    global answer
+    select = random.randint(1,4)
+    print(select)
+    A = ' '
+    B = ' '
+    C = ' '
+    D = ' '
+    if (select == 1):
+        A = str(person)
+        answer = '\U0001F1E6'
+        printable = ':regional_indicator_a:'
+        B = str(random.choice(os.listdir('./Clips/MIDI/')))
+        if B == A:
+            while (B == A):
+                B = str(random.choice(os.listdir('./Clips/MIDI/')))
+                
+        C = str(random.choice(os.listdir('./Clips/MIDI/')))
+        if (C == A or C == B):
+            while (C == A or C == B):
+                C = str(random.choice(os.listdir('./Clips/MIDI/')))
+                
+        D = str(random.choice(os.listdir('./Clips/MIDI/')))
+        if (D == A or D == C or D == B):
+            while (D == A or D == C or D == B):
+                D = str(random.choice(os.listdir('./Clips/MIDI/')))
+    if (select == 2):
+        B = str(person)
+        answer = '\U0001F1E7'
+        printable = ':regional_indicator_b:'
+        A = str(random.choice(os.listdir('./Clips/MIDI/')))
+        if B == A:
+            while (B == A):
+                A = str(random.choice(os.listdir('./Clips/MIDI/')))
+                
+        C = str(random.choice(os.listdir('./Clips/MIDI/')))
+        if (C == A or C == B):
+            while (C == A or C == B):
+                C = str(random.choice(os.listdir('./Clips/MIDI/')))
+                
+        D = str(random.choice(os.listdir('./Clips/MIDI/')))
+        if (D == A or D == C or D == B):
+            while (D == A or D == C or D == B):
+                D = str(random.choice(os.listdir('./Clips/MIDI/')))
+    if (select == 3):
+        C = str(person)
+        answer = '\U0001F1E8'
+        printable = ':regional_indicator_c:'
+        B = str(random.choice(os.listdir('./Clips/MIDI/')))
+        if B == C:
+            while (B == C):
+                B = str(random.choice(os.listdir('./Clips/MIDI/')))
+                
+        A = str(random.choice(os.listdir('./Clips/MIDI/')))
+        if (C == A or C == B):
+            while (C == A or C == B):
+                A = str(random.choice(os.listdir('./Clips/MIDI/')))
+                
+        D = str(random.choice(os.listdir('./Clips/MIDI/')))
+        if (D == A or D == C or D == B):
+            while (D == A or D == C or D == B):
+                D = str(random.choice(os.listdir('./Clips/MIDI/')))
+    if (select == 4):
+        D = str(person)
+        answer = '\U0001F1E9'
+        printable = ':regional_indicator_d:'
+        A = str(random.choice(os.listdir('./Clips/MIDI/')))
+        if D == A:
+            while (D == A):
+                A = str(random.choice(os.listdir('./Clips/MIDI/')))
+                
+        C = str(random.choice(os.listdir('./Clips/MIDI/')))
+        if (C == A or C == D):
+            while (C == A or C == D):
+                C = str(random.choice(os.listdir('./Clips/MIDI/')))
+                
+        B = str(random.choice(os.listdir('./Clips/MIDI/')))
+        if (B == A or B == C or D == B):
+            while (B == A or B == C or D == B):
+                B = str(random.choice(os.listdir('./Clips/MIDI/')))
+    msg = "Was it\n:regional_indicator_a:\t\u21e6\t" + A[:-4] + "\n:regional_indicator_b:\t\u21e6\t" + B[:-4] + "\n:regional_indicator_c:\t\u21e6\t" + C[:-4] + "\n:regional_indicator_d:\t\u21e6\t" + D[:-4]
+    message = await ctx.send(msg)
+    await message.add_reaction('\U0001F1E6')
+    await message.add_reaction('\U0001F1E7')
+    await message.add_reaction('\U0001F1E8')
+    await message.add_reaction('\U0001F1E9')
+    await asyncio.sleep(30)
+    msg = "The correct answer was " + printable + "\n\nCongratulations to:\n"
+    await ctx.send(msg , tts = True)
+    if ('Baconmaster#3725' in winners):
+        await message.channel.send(file=discord.File('./Pics/bacon.png'))
+    if ('BOOF#4284' in winners):
+        await message.channel.send(file=discord.File('./Pics/beef.png'))
+    if ('ratbuddy#9913' in winners):
+        await message.channel.send(file=discord.File('./Pics/ratto.png'))
+    elif ('ShadowXII#7240' in winners):
+        await message.channel.send(file=discord.File('./Pics/horse.png'))
+    #elif winners:
+        #await ctx.send('\n'.join(map(str, winners)))
+    else:
+        await message.channel.send(file=discord.File('./Pics/flumbus.png'))
+    msg = "\n:clap::clap::clap::clap::clap::clap:\n"
+    await ctx.send(msg, tts = True)
+    winners.clear()
+    
+
 @client.command(pass_context=True, name = 'bruh', help ='For the bruh moments in our lives')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def bruh(ctx):
     cliplocation = './Clips/bruh.mp3'
+    duration = librosa.get_duration(filename=cliplocation)
+    duration += 1
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild=ctx.guild)
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
+    source = FFmpegPCMAudio(cliplocation)
+    source = discord.PCMVolumeTransformer(source)
+    source.volume = 1.5
+    player = voice.play(source)
+    await asyncio.sleep(duration)
+    player = voice.stop()
+    await ctx.voice_client.disconnect()
+
+@client.command(pass_context=True, name = 'baba', help ='Meaty Chairs and Baba Yetus')
+@commands.cooldown(1,10,commands.BucketType.user)
+async def baba(ctx):
+    cliplocation = './Clips/babayeet.mp3'
     duration = librosa.get_duration(filename=cliplocation)
     duration += 1
     channel = ctx.message.author.voice.channel
@@ -357,6 +546,26 @@ async def fridge(ctx):
 @commands.cooldown(1,10,commands.BucketType.user)
 async def clap(ctx):
     cliplocation = './Clips/clap.mp3'
+    duration = librosa.get_duration(filename=cliplocation)
+    duration += 1
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild=ctx.guild)
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
+    source = FFmpegPCMAudio(cliplocation)
+    source = discord.PCMVolumeTransformer(source)
+    source.volume = 1.5
+    player = voice.play(source)
+    await asyncio.sleep(duration)
+    player = voice.stop()
+    await ctx.voice_client.disconnect()
+
+@client.command(pass_context=True, name = 'keyboard', help ='I hear a keyboard round here')
+@commands.cooldown(1,10,commands.BucketType.user)
+async def keyboard(ctx):
+    cliplocation = './Clips/keyboard.mp3'
     duration = librosa.get_duration(filename=cliplocation)
     duration += 1
     channel = ctx.message.author.voice.channel
@@ -543,6 +752,27 @@ async def ramsay(ctx):
     player = voice.stop()
     await ctx.voice_client.disconnect()
 
+@client.command(pass_context=True, name = 'gleib', help ='This is your Idiotest')
+@commands.cooldown(1,10,commands.BucketType.user)
+async def gleib(ctx):
+    person = str(random.choice(os.listdir('./Clips/gleib/')))
+    cliplocation = './Clips/gleib/' + person
+    duration = librosa.get_duration(filename=cliplocation)
+    duration += 1
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild=ctx.guild)
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
+    source = FFmpegPCMAudio(cliplocation)
+    source = discord.PCMVolumeTransformer(source)
+    source.volume = 1.5
+    player = voice.play(source)
+    await asyncio.sleep(duration)
+    player = voice.stop()
+    await ctx.voice_client.disconnect()
+
 @client.command(pass_context=True, name = 'bigsmoke', help ='Big Smoke gets Philisophical')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def bigsmoke(ctx):
@@ -563,6 +793,13 @@ async def bigsmoke(ctx):
     await asyncio.sleep(duration)
     player = voice.stop()
     await ctx.voice_client.disconnect()
+
+@client.command(pass_context=True, name = 'cancel', help ='null')
+@commands.cooldown(1,10,commands.BucketType.user)
+async def cancel(ctx):
+    global x
+    x = -999999999999999999999
+
 
 @client.command(pass_context=True, name = 'prequel', help ='wut')
 @commands.cooldown(1,10,commands.BucketType.user)
@@ -756,7 +993,7 @@ async def got(ctx):
 @client.command(pass_context=True, name = 'fact', help ='Bonzi knows so much')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def fact(ctx):
-    person = str(random.choice(os.listdir('./Clips/fact/')))
+    person = str(random.choice(os.listdir('./Clips/facts/')))
     cliplocation = './Clips/fact/' + person
     duration = librosa.get_duration(filename=cliplocation)
     duration += 1
@@ -845,6 +1082,46 @@ async def surprise(ctx):
             except HTTPError:
                     print("found one that don't work")
 
+@client.command(pass_context=True, name = 'autopilot', help ='Let flumbot gamble his life away')
+@commands.cooldown(1,10,commands.BucketType.user)
+async def autopilot(ctx):
+    global pilot
+    pilot = 1
+    timer = 0
+    msg = 'AutoPilot engaged, to turn off type "off"'
+    await ctx.send(msg)
+    while (pilot == 1):
+        if (timer > 2500):
+            timer = 0
+        await asyncio.sleep(timer)
+        person = str(random.choice(os.listdir('./Clips/!gamble/')))
+        cliplocation = './Clips/!gamble/' + person
+        duration = librosa.get_duration(filename=cliplocation)
+        duration += 1
+        channel = ctx.message.author.voice.channel
+        voice = get(client.voice_clients, guild=ctx.guild)
+        if voice and voice.is_connected():
+            await voice.move_to(channel)
+        else:
+            voice = await channel.connect()
+        source = FFmpegPCMAudio(cliplocation)
+        source = discord.PCMVolumeTransformer(source)
+        source.volume = 1.5
+        player = voice.play(source)
+        await asyncio.sleep(duration)
+        player = voice.stop()
+        await ctx.voice_client.disconnect()
+        timer = timer + random.randint(30, 100)
+        print ('waiting ' + str(timer) + ' seconds before next clip')
+
+
+        
+@client.command(pass_context=True, name = 'off' , help ='Turn off autopilot :(')
+@commands.cooldown(1,10,commands.BucketType.user)
+async def off(ctx):
+    global pilot
+    pilot = 0
+    print('autopilot off')
 
 @client.command(pass_context=True, name = 'stop' , help ='Ruin the fun for everyone')
 @commands.cooldown(1,10,commands.BucketType.user)
