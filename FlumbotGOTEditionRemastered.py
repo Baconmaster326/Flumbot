@@ -15,6 +15,7 @@ import youtube_dl
 import shutil
 import daystart
 import messager
+import voicememe
 from gtts import gTTS
 from googleapiclient.discovery import build
 from itertools import cycle
@@ -31,7 +32,7 @@ from datetime import date
 
 today = date.today()
 now = datetime.datetime.now()
-token = 'NTQ5OTk2NDI0NDIzNTM4Njg4.XhqeAA.hAMuBPBqiLNyf8ctjjpcdDAnW90'
+token = 'gamer'
 client = commands.Bot(command_prefix = '', case_insensitive = True, )
 x = 0
 pilot = 0
@@ -87,14 +88,15 @@ async def on_message_delete(message):
 
 @client.event
 async def on_typing(channel,user,when):
+    name = str(user)
+    name = name[:-5]
     def check(m):
         return user == user
-    if(str(user) == 'ShadowXII#7240'):
-        try:
-            await client.wait_for('message', check = check, timeout=90)
-        except asyncio.TimeoutError:
-            msg = "finish typing marc, we are all waiting :)"
-            await channel.send(msg)
+    try:
+        await client.wait_for('message', check = check, timeout=5)
+    except asyncio.TimeoutError:
+        msg = "finish typing " + name + ", we are all waiting :)"
+        await channel.send(msg)
     return
 
 @client.event
@@ -116,6 +118,8 @@ async def on_reaction_add(reaction, user):
         if(str(user) == 'ShadowXII#7240'):
             winners.append(str(user))
         if(str(user) == 'Baconmaster#3725'):
+            winners.append(str(user))
+        else:
             winners.append(str(user))
         return
     cheaters.append(str(user))
@@ -184,471 +188,85 @@ async def football(ctx, *args):
     msg = "HI EVERYONE AND WELCOME TO JOHN MADDEN FOOTBALL!!!"
     await ctx.send(msg)
     cliplocation = './Clips/Futbol.mp3'
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'MidiMania', help ='The hit new game hosted by yours truly')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def MidiMania(ctx, *args):
-    filename = "longtermdata.txt"
     global cheaters
     cheaters.clear()
-    #send opener
-    msg = "It's time to guess that Midi!\nYou'll have 30 seconds to pick the correct song from 4 choices\nPICK ONLY ONE TIME"
-    await ctx.send(msg, tts = True)
-    await asyncio.sleep(10)
-    #pick midi to play
-    person = str(random.choice(os.listdir('./Clips/MIDI/')))
-    cliplocation = './Clips/MIDI/' + person
-    duration = 30
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
     global answer
-    #select which place the answer will go in
-    select = random.randint(1,4)
-    #clear variables in case of misuse of midimania
-    A = ' '
-    B = ' '
-    C = ' '
-    D = ' '
-    #take 4 random non-repeating samples
-    samples = random.sample(os.listdir('./Clips/MIDI/'), 4)
-    A = samples[0]
-    B = samples[1]
-    C = samples[2]
-    D = samples[3]
-    #if one of them is the answer pick a new song to replace it
-    while(A == person or B == person or C == person or D == person):
-        print("doing it")
-        samples = random.sample(os.listdir('./Clips/MIDI/'), 4)
-        A = samples[0]                        
-        B = samples[1]
-        C = samples[2]
-        D = samples[3]
-
-    #assign the correct song to its corresponding place                            
-    if (select == 1):
-        A = str(person)
-        answer = '\U0001F1E6'
-        printable = ':regional_indicator_a:'
-    if (select == 2):
-        B = str(person)
-        answer = '\U0001F1E7'
-        printable = ':regional_indicator_b:'
-    if (select == 3):
-        C = str(person)
-        answer = '\U0001F1E8'
-        printable = ':regional_indicator_c:'
-    if (select == 4):
-        D = str(person)
-        answer = '\U0001F1E9'
-        printable = ':regional_indicator_d:'
-
-    #print the message to vote on the songs    
-    msg = "Was it\n:regional_indicator_a:\t\u21e6\t" + A[:-4] + "\n:regional_indicator_b:\t\u21e6\t" + B[:-4] + "\n:regional_indicator_c:\t\u21e6\t" + C[:-4] + "\n:regional_indicator_d:\t\u21e6\t" + D[:-4]
-    message = await ctx.send(msg)
-    await message.add_reaction('\U0001F1E6')
-    await message.add_reaction('\U0001F1E7')
-    await message.add_reaction('\U0001F1E8')
-    await message.add_reaction('\U0001F1E9')
+    answer,printable = await voicememe.midimania(ctx,client)
     await asyncio.sleep(30)
-    msg = "The correct answer was " + printable + "\n\nCongratulations to:\n"
-    await ctx.send(msg , tts = True)
-    #check who answered
-    if ('Baconmaster#3725' in winners):
-        await message.channel.send(file=discord.File('./Pics/bacon.png'))
-        with open(filename, 'r') as file:
-            data = file.readlines()
-        data[2] = str(int(data[2]) + 20) + '\n'
-        with open(filename , 'w') as file:
-            file.writelines(data)
-        data = (data[2].strip('\n'))
-        msg = "Sean has " + data + " marcs!"
-        await ctx.send(msg)
-    if ('BOOF#4284' in winners):
-        await message.channel.send(file=discord.File('./Pics/beef.png'))
-        with open(filename, 'r') as file:
-            data = file.readlines()
-        data[3] = str(int(data[3]) + 20) + '\n'
-        with open(filename , 'w') as file:
-            file.writelines(data)
-        data = (data[3].strip('\n'))
-        msg = "Niche has " + data + " marcs!"
-        await ctx.send(msg)
-    if ('ratbuddy#9913' in winners):
-        await message.channel.send(file=discord.File('./Pics/ratto.png'))
-        with open(filename, 'r') as file:
-            data = file.readlines()
-        data[4] = str(int(data[4]) + 20) + '\n'
-        with open(filename , 'w') as file:
-            file.writelines(data)
-        data = (data[4].strip('\n'))
-        msg = "Rat has " + data + " marcs!"
-        await ctx.send(msg)
-    if ('ShadowXII#7240' in winners):
-        await message.channel.send(file=discord.File('./Pics/horse.png'))
-        with open(filename, 'r') as file:
-            data = file.readlines()
-        data[5] = str(int(data[5]) + 20) + '\n'
-        with open(filename , 'w') as file:
-            file.writelines(data)
-        data = (data[5].strip('\n'))
-        msg = "Marc has " + data + " marcs!"
-        await ctx.send(msg)
-        #await ctx.send('\n'.join(map(str, winners)))
-    #if list is empty report the flumbot won
-    if (len(winners) == 0):    
-        await message.channel.send(file=discord.File('./Pics/flumbus.png'))
-        with open(filename, 'r') as file:
-            data = file.readlines()
-        data[6] = str(int(data[6]) + 20) + '\n'
-        with open(filename , 'w') as file:
-            file.writelines(data)
-        data = (data[6].strip('\n'))
-        msg = "Flumbot has " + data + " marcs!"
-        await ctx.send(msg)
-    else:
-        msg = 'Here is the text lineup of the winners'
-        await ctx.send(msg)
-        msg = winners
-        msg = ''.join(c for c in msg if c not in "'[],")
-        await ctx.send(msg)
-    msg = "\n:clap::clap::clap::clap::clap::clap:\n"
-    await ctx.send(msg, tts = True)
-    #clear list before leaving function
+    global winners
+    await voicememe.winnerlist(ctx,client,winners,printable,20)
     winners.clear()
+    return
+
 
 
 @client.command(pass_context=True, name = 'MidiManiaDX', help ='You may have conquered regular midimania, but can you do midimania deluxe???')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def MidiManiaDX(ctx, *args):
-    filename = "longtermdata.txt"
     global cheaters
     cheaters.clear()
-    #send opener
-    msg = "It's time to for MidimaniaDX \nP \nO \nG\n You'll have 30 seconds to pick the correct song from 4 questionable choices, pick only one time"
-    await ctx.send(msg, tts = True)
-    await asyncio.sleep(20)
-    #pick midi to play
-    person = str(random.choice(os.listdir('./Clips/MIDIDX/')))
-    cliplocation = './Clips/MIDIDX/' + person
-    duration = 30
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
     global answer
-    #select which place the answer will go in
-    select = random.randint(1,4)
-    #clear variables in case of misuse of midimania
-    A = ' '
-    B = ' '
-    C = ' '
-    D = ' '
-    #take 4 random non-repeating samples
-    samples = random.sample(os.listdir('./Clips/MIDIDX/'), 4)
-    A = samples[0]
-    B = samples[1]
-    C = samples[2]
-    D = samples[3]
-    #if one of them is the answer pick a new song to replace it
-    while(A == person or B == person or C == person or D == person):
-        print("doing it")
-        samples = random.sample(os.listdir('./Clips/MIDIDX/'), 4)
-        A = samples[0]                        
-        B = samples[1]
-        C = samples[2]
-        D = samples[3]
-
-    #assign the correct song to its corresponding place                            
-    if (select == 1):
-        A = str(person)
-        answer = '\U0001F1E6'
-        printable = ':regional_indicator_a:'
-    if (select == 2):
-        B = str(person)
-        answer = '\U0001F1E7'
-        printable = ':regional_indicator_b:'
-    if (select == 3):
-        C = str(person)
-        answer = '\U0001F1E8'
-        printable = ':regional_indicator_c:'
-    if (select == 4):
-        D = str(person)
-        answer = '\U0001F1E9'
-        printable = ':regional_indicator_d:'
-
-    #print the message to vote on the songs    
-    msg = "Was it\n:regional_indicator_a:\t\u21e6\t" + A[:-4] + "\n:regional_indicator_b:\t\u21e6\t" + B[:-4] + "\n:regional_indicator_c:\t\u21e6\t" + C[:-4] + "\n:regional_indicator_d:\t\u21e6\t" + D[:-4]
-    message = await ctx.send(msg)
-    await message.add_reaction('\U0001F1E6')
-    await message.add_reaction('\U0001F1E7')
-    await message.add_reaction('\U0001F1E8')
-    await message.add_reaction('\U0001F1E9')
+    answer,printable = await voicememe.midimaniadx(ctx,client)
     await asyncio.sleep(30)
-    msg = "The correct answer was " + printable + "\n\nCongratulations to:\n"
-    await ctx.send(msg, tts = True)
-    #check who answered
-    if ('Baconmaster#3725' in winners):
-        await message.channel.send(file=discord.File('./Pics/bacon.png'))
-        with open(filename, 'r') as file:
-            data = file.readlines()
-        data[2] = str(int(data[2]) + 35) + '\n'
-        with open(filename , 'w') as file:
-            file.writelines(data)
-        data = (data[2].strip('\n'))
-        msg = "Sean has " + data + " marcs!"
-        await ctx.send(msg)
-    if ('BOOF#4284' in winners):
-        await message.channel.send(file=discord.File('./Pics/beef.png'))
-        with open(filename, 'r') as file:
-            data = file.readlines()
-        data[3] = str(int(data[3]) + 35) + '\n'
-        with open(filename , 'w') as file:
-            file.writelines(data)
-        data = (data[3].strip('\n'))
-        msg = "Niche has " + data + " marcs!"
-        await ctx.send(msg)
-    if ('ratbuddy#9913' in winners):
-        await message.channel.send(file=discord.File('./Pics/ratto.png'))
-        with open(filename, 'r') as file:
-            data = file.readlines()
-        data[4] = str(int(data[4]) + 35) + '\n'
-        with open(filename , 'w') as file:
-            file.writelines(data)
-        data = (data[4].strip('\n'))
-        msg = "Rat has " + data + " marcs!"
-        await ctx.send(msg)
-    if ('ShadowXII#7240' in winners):
-        await message.channel.send(file=discord.File('./Pics/horse.png'))
-        with open(filename, 'r') as file:
-            data = file.readlines()
-        data[5] = str(int(data[5]) + 35) + '\n'
-        with open(filename , 'w') as file:
-            file.writelines(data)
-        data = (data[5].strip('\n'))
-        msg = "Marc has " + data + " marcs!"
-        await ctx.send(msg)
-    #elif winners:
-        #await ctx.send('\n'.join(map(str, winners)))
-
-    #if list is empty report the flumbot won    
-    if (len(winners) == 0):    
-        await message.channel.send(file=discord.File('./Pics/flumbus.png'))
-        with open(filename, 'r') as file:
-            data = file.readlines()
-        data[6] = str(int(data[6]) + 35) + '\n'
-        with open(filename , 'w') as file:
-            file.writelines(data)
-        data = (data[6].strip('\n'))
-        msg = "Flumbot has " + data + " marcs!"
-        await ctx.send(msg)
-    else:
-        msg = 'Here is the text lineup of the winners'
-        await ctx.send(msg)
-        msg = winners
-        msg = ''.join(c for c in msg if c not in "'[],")
-        await ctx.send(msg)
-    msg = "\n:clap::clap::clap::clap::clap::clap:\n"
-    await ctx.send(msg)
-    #clear list before leaving function
+    global winners
+    await voicememe.winnerlist(ctx,client,winners,printable,35)
     winners.clear()
-    
+    return
+
 
 @client.command(pass_context=True, name = 'bruh', help ='For the bruh moments in our lives')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def bruh(ctx, *args):
     cliplocation = './Clips/bruh.mp3'
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'baba', help ='Meaty Chairs and Baba Yetus')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def baba(ctx, *args):
     cliplocation = './Clips/babayeet.mp3'
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'thomas', help ='Thomas coming through')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def thomas(ctx, *args):
     cliplocation = './Clips/thomas.mp3'
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'fridge', help ='Classico Flumico')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def fridge(ctx, *args):
     cliplocation = './Clips/oof.mp3'
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'clap', help ='clap')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def clap(ctx, *args):
     cliplocation = './Clips/clap.mp3'
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'keyboard', help ='I hear a keyboard round here')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def keyboard(ctx, *args):
     cliplocation = './Clips/keyboard.mp3'
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'chum', help ='Gnot for the weak of heart')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def chum(ctx, *args):
     msg = ":tired_face: You've been gnomed! :tired_face:"
     await ctx.send(msg)
-    cliplocation = './Clips/gnome.mp3'
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'knock', help ='Who is it? MonkaS')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def knock(ctx, *args):
     cliplocation = './Clips/knock.mp3'
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'cocaine', help ='I am Impotent Rage')
 @commands.cooldown(1,10,commands.BucketType.user)
@@ -656,21 +274,7 @@ async def cocaine(ctx, *args):
     msg = "Okay Mr.Phillips"
     await ctx.send(msg)
     cliplocation = './Clips/trevor.mp3'
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'futbol', help ='A modern spin on a classic clip')
 @commands.cooldown(1,10,commands.BucketType.user)
@@ -678,406 +282,133 @@ async def futbol(ctx, *args):
     msg = "HI EVERYONE AND WELCOME TO JOHN MADDEN FOOT!"
     await ctx.send(msg)
     cliplocation = './Clips/fut.mp3'
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'gamble', help ='House always wins')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def gamble(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/!gamble/')))
     cliplocation = './Clips/!gamble/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'spongebob', help ='You gotta lick the Marble')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def spongebob(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/spongebob/')))
     cliplocation = './Clips/spongebob/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'alexjones', help ='Alex Jones screams about walruses')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def alexjones(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/alexjones/')))
     cliplocation = './Clips/alexjones/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'ramsay', help ='Gordon Ramsay enlightens the chat')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def ramsay(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/ramsay/')))
     cliplocation = './Clips/ramsay/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'gleib', help ='This is your Idiotest')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def gleib(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/gleib/')))
     cliplocation = './Clips/gleib/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
-
+    await voicememe.playclip(cliplocation,ctx,client,0)
+    
 @client.command(pass_context=True, name = 'bigsmoke', help ='Big Smoke gets Philisophical')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def bigsmoke(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/bigsmoke/')))
     cliplocation = './Clips/bigsmoke/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
-
-@client.command(pass_context=True, name = 'cancel', help ='null')
-@commands.cooldown(1,10,commands.BucketType.user)
-async def cancel(ctx, *args):
-    global x
-    x = -999999999999999999999
-
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'prequel', help ='wut')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def bigsmoke(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/prequel/')))
     cliplocation = './Clips/prequel/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'meme', help ='The biggest collection of memes since gamble')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def meme(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/meme/')))
     cliplocation = './Clips/meme/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'agent', help ='Agent 14 tells you what to do')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def agent(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/agent14/')))
     cliplocation = './Clips/agent14/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'trevor', help ='Trevor...Phillips...Industries...')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def trevor(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/trevor/')))
     cliplocation = './Clips/trevor/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'lester', help ='Because we do not hear Lester enough')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def lester(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/lester/')))
     cliplocation = './Clips/lester/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'joke', help ='Biggest Laughs')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def joke(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/bonzi/')))
     cliplocation = './Clips/bonzi/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'IASIP', help ='Trashman comes to eat garbage')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def IASIP(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/IASIP/')))
     cliplocation = './Clips/IASIP/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'trump', help ='We gotta build the wall')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def trump(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/trump/')))
     cliplocation = './Clips/trump/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
     
 @client.command(pass_context=True, name = 'got', help ='BOBBY B to our rescue')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def got(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/got/')))
     cliplocation = './Clips/got/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'fact', help ='Bonzi knows so much')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def fact(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/facts/')))
     cliplocation = './Clips/fact/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'wwe', help ='HULK HOGAN')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def wwe(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/wwe/')))
     cliplocation = './Clips/wwe/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True, name = 'sports', help ='NICE ON!')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def sports(ctx, *args):
     person = str(random.choice(os.listdir('./Clips/sports/')))
     cliplocation = './Clips/sports/' + person
-    duration = librosa.get_duration(filename=cliplocation)
-    duration += 1
-    channel = ctx.message.author.voice.channel
-    voice = get(client.voice_clients, guild=ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-    source = FFmpegPCMAudio(cliplocation)
-    source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
-    player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
+    await voicememe.playclip(cliplocation,ctx,client,0)
 
 @client.command(pass_context=True)
 @commands.cooldown(1,10,commands.BucketType.user)
@@ -1198,21 +529,7 @@ async def autopilot(ctx, *args):
         await asyncio.sleep(timer)
         person = str(random.choice(os.listdir('./Clips/!gamble/')))
         cliplocation = './Clips/!gamble/' + person
-        duration = librosa.get_duration(filename=cliplocation)
-        duration += 1
-        channel = ctx.message.author.voice.channel
-        voice = get(client.voice_clients, guild=ctx.guild)
-        if voice and voice.is_connected():
-            await voice.move_to(channel)
-        else:
-            voice = await channel.connect()
-        source = FFmpegPCMAudio(cliplocation)
-        source = discord.PCMVolumeTransformer(source)
-        source.volume = 1.5
-        player = voice.play(source)
-        await asyncio.sleep(duration)
-        player = voice.stop()
-        await ctx.voice_client.disconnect()
+        await voicememe.playclip(cliplocation,ctx,client,0)
         timer = timer + random.randint(30, 100)
         print ('waiting ' + str(timer) + ' seconds before next clip')
 
@@ -1247,7 +564,7 @@ async def tts(ctx, *args):
     global data
     global username
     pilot = 1
-
+    os.remove('text.mp3')
     while(pilot !=0):
         if (data == 'null' or data == 'tts'):
             await asyncio.sleep(1)
@@ -1307,7 +624,8 @@ async def ball(ctx, *args):
              "The future looks bright", "It is unlikely", "Pray on it", "Ask marc", "Ask rat", "Ask niche", "Ask yourself", "best @everyone with your question",\
              "yes", "the future you seek has already happened", "marc said he will do it for you", "only t-dubs will know the answer to your question", "Ask again", "It is certain", \
              "It is decidedly so", "Most likely", "Meh", "Signs point to yes", "Without a doubt", "Outlook good", "Outlook not so good", "You may rely on it", "Cannot predict now", \
-             "Just die", "I prescribe a midimania to heal", "Maybe think on it a few days", "Rome wasn't built in a day", "The day of reckoning is approaching", "help me"]
+             "Just die", "I prescribe a midimania to heal", "Maybe think on it a few days", "Rome wasn't built in a day", "The day of reckoning is approaching", "help me"\
+             "Fo Sure", "Nah", "I don't feel like it", "behind you is the answer you seek"]
         msg = random.choice(wager)   
         await ctx.send(msg, tts = True)
         
@@ -1319,22 +637,9 @@ async def music(ctx, *args):
     while (pilot == 1):
         person = str(random.choice(os.listdir('./Clips/MIDI/')))
         cliplocation = './Clips/MIDI/' + person
-        duration = librosa.get_duration(filename=cliplocation)
-        duration += 1
-        channel = ctx.message.author.voice.channel
-        voice = get(client.voice_clients, guild=ctx.guild)
-        if voice and voice.is_connected():
-            await voice.move_to(channel)
-        else:
-            voice = await channel.connect()
-        source = FFmpegPCMAudio(cliplocation)
-        source = discord.PCMVolumeTransformer(source)
-        source.volume = 1.5
-        player = voice.play(source)
-        await asyncio.sleep(duration)
-        player = voice.stop()
+        await voicememe.playclip(cliplocation,ctx,client,0)
         await asyncio.sleep(2)
-        print('waited')
+        print('waited, playing next song')
 
 @client.command(pass_context=True, name = 'inventory' , help ='checkout your cool stuff')
 @commands.cooldown(1,10,commands.BucketType.user)
@@ -1412,6 +717,7 @@ async def inventory(ctx, *args):
 
 @client.command(pass_context=True, name = 'flum' , help ='check or set flum status')
 async def flumstatus(ctx, *args):
+    y = list(args)
     filename = "longtermdata.txt"
     author = str(ctx.message.author)
     gamer = 'not set'
@@ -1456,6 +762,84 @@ async def flumstatus(ctx, *args):
         with open(filename , 'w') as file:
                 file.writelines(data)   
         return
+
+    if ('flavortext' in args):
+        filename = './quips/gamemsg.txt'
+        y.remove('flavortext')
+        y =  str(y) + '\n'
+        print(y)
+        char_list = ["'", "[" , "]", ","]
+        for i in char_list:
+            y = y.replace(i, '')
+        with open(filename, "a") as file:
+            file.write(y)
+        msg = 'succesfully added ' + "'" + y.strip('\n') + "'" + ' to flavortext list'
+        await ctx.send(msg)
+
+    if ('awake' in args):
+        filename = './quips/awakemsg.txt'
+        y.remove('awake')
+        y =  str(y) + '\n'
+        print(y)
+        char_list = ["'", "[" , "]", ","]
+        for i in char_list:
+            y = y.replace(i, '')
+        with open(filename, "a") as file:
+            file.write(y)
+        msg = 'succesfully added ' + "'" + y.strip('\n') + "'" + ' to the startup message list'
+        await ctx.send(msg)
+
+    if ('name' in args):
+        filename = './quips/botlist.txt'
+        y.remove('name')
+        y =  str(y) + '\n'
+        print(y)
+        char_list = ["'", "[" , "]", ","]
+        for i in char_list:
+            y = y.replace(i, '')
+        with open(filename, "a") as file:
+            file.write(y)
+        msg = 'succesfully added ' + "'" + y.strip('\n') + "'" + ' to flumbot response list'
+        await ctx.send(msg)
+
+    if ('bet' in args):
+        filename = './quips/betlist.txt'
+        y.remove('bet')
+        y =  str(y) + '\n'
+        print(y)
+        char_list = ["'", "[" , "]", ","]
+        for i in char_list:
+            y = y.replace(i, '')
+        with open(filename, "a") as file:
+            file.write(y)
+        msg = 'succesfully added ' + "'" + y.strip('\n') + "'" + ' to bet list'
+        await ctx.send(msg)
+
+    if ('ad' in args):
+        filename = './quips/adlist.txt'
+        y.remove('ad')
+        y =  str(y) + '\n'
+        print(y)
+        char_list = ["'", "[" , "]", ","]
+        for i in char_list:
+            y = y.replace(i, '')
+        with open(filename, "a") as file:
+            file.write(y)
+        msg = 'succesfully added ' + "'" + y.strip('\n') + "'" + ' to list of ads'
+        await ctx.send(msg)
+
+    if ('video' in args):
+        filename = './quips/flumvideos.txt'
+        y.remove('video')
+        y =  str(y) + '\n'
+        print(y)
+        char_list = ["'", "[" , "]", ","]
+        for i in char_list:
+            y = y.replace(i, '')
+        with open(filename, "a") as file:
+            file.write(y)
+        msg = 'succesfully added ' + "'" + y.strip('\n') + "'" + ' to list of flumbot streams'
+        await ctx.send(msg)
     
     if ('status' in args):
         with open(filename, 'r') as file:
@@ -1848,35 +1232,6 @@ async def checkin(ctx, *args):
             await ctx.send(msg)
 
     
-        
-
-##@client.command(pass_context=True, name = 'remind' , help ='flumbot finally reminds you off all those things todo')
-##@commands.cooldown(1,10,commands.BucketType.user)
-##async def remind(ctx):
-##    global data
-##    i = 0
-##    j = len(data)
-##    word = []
-##    str1 = ""
-##    nice1 = ""
-##    time = 0
-##    while(j != 0):
-##        if (data[i].isdigit()):
-##            print (data[i] + 'found it')
-##            time = int(data[i])
-##            i += 2
-##            while (data[i] != ' '):
-##                print (data[i] + 'found it')
-##                word.append(data[i])
-##                i += 1
-##        print(data[i])
-##        i += 1
-##        j -= 1
-##        print(str(i) + ' ' + str(j))
-##    print(time)
-##    print(word)
-    
-        
 @client.command(pass_context=True, name = 'off' , help ='Turn off autopilot :(')
 @commands.cooldown(1,10,commands.BucketType.user)
 async def off(ctx, *args):
@@ -1885,6 +1240,12 @@ async def off(ctx, *args):
     server = ctx.message.guild.voice_client
     await server.disconnect()
     print('autopilot off')
+
+@client.command(pass_context=True, name = 'cancel', help ='null')
+@commands.cooldown(1,10,commands.BucketType.user)
+async def cancel(ctx, *args):
+    global x
+    x = -999999999999999999999
 
 @client.command(pass_context=True, name = 'stop' , help ='Ruin the fun for everyone')
 @commands.cooldown(1,10,commands.BucketType.user)

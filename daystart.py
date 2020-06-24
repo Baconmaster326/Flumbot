@@ -75,9 +75,9 @@ def datecheck():
         return 1
 
 def link():
-    selector = ((random.randint(0,100)) % 2)
+    selector = ((random.randint(0,100)) % 6)
 
-    if (selector == 0):
+    if (selector != 0):
         #if len(argv) > 1:
                 #open = True
 
