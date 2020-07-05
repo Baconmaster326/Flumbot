@@ -1,4 +1,5 @@
 import random
+import json
 
 def check(ctx):
     print(ctx)
@@ -15,17 +16,16 @@ def check(ctx):
         return msg, flag
     
     if ('good bot' in ctx)  or ('bad bot' in ctx):
-        filename = "longtermdata.txt"
-        with open(filename, 'r') as file:
-            data = file.readlines()
+        with open("longtermdata.json", "r") as file:
+            data = json.load(file)
         if ('bad bot') in ctx:
-            data[1] = str(int(data[1]) - 1) + '\n'
-            msg = ':rage: You :rage: brought :rage: my :rage: thanks :rage: to :rage: ' + data[1].strip('\n') + 'th :rage: hope :rage: you :rage: feel :rage: good :rage:'
+            data['dayvalues']['goodness'] = data['dayvalues']['goodness'] - 1
+            msg = ':rage: You :rage: brought :rage: my :rage: thanks :rage: to :rage: ' + str(data['dayvalues']['goodness']) + 'th :rage: hope :rage: you :rage: feel :rage: good :rage:'
         if ('good bot') in ctx:
-            data[1] = str(int(data[1]) + 1) + '\n'
-            msg = 'Thank :clap: you :clap: are :clap: the :clap: ' + data[1].strip('\n') + 'th :clap: person :clap: to :clap: thank :clap: me. :clap:'
-        with open(filename , 'w') as file:
-            file.writelines(data)
+            data['dayvalues']['goodness'] = data['dayvalues']['goodness'] + 1
+            msg = 'Thank :clap: you :clap: are :clap: the :clap: ' + str(data['dayvalues']['goodness']) + 'th :clap: person :clap: to :clap: thank :clap: me. :clap:'
+        with open("longtermdata.json", "w") as file:
+            json.dump(data, file)
         flag = True
         return msg, flag
     
@@ -55,7 +55,3 @@ def check(ctx):
     msg = 'oop'
     flag = False
     return msg, flag
-
-        
-        
-        

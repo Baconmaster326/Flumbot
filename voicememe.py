@@ -1,31 +1,12 @@
 from __future__ import unicode_literals
-from random_word import RandomWords
 import discord
-import ffmpeg
 import asyncio
 import random
-import time
 import os
-import string
 import librosa
-import urllib.request
-import datetime
-import re
-import youtube_dl
-import shutil
-import daystart
-import messager
-from gtts import gTTS
-from googleapiclient.discovery import build
-from itertools import cycle
-from discord.ext import commands
+import json
 from discord import FFmpegPCMAudio
 from discord.utils import get
-from sys import argv
-from os import system
-from urllib.error import HTTPError
-from random import choice
-from datetime import date
 
 async def playclip(cliplocation,ctx,client,overide):
     print('starting to play clip')
@@ -52,16 +33,16 @@ async def midimania(ctx,client):
     msg = "It's time to guess that Midi!\nYou'll have 30 seconds to pick the correct song from 4 choices\nPICK ONLY ONE TIME"
     await ctx.send(msg, tts = True)
     await asyncio.sleep(10)
-    person = str(random.choice(os.listdir('./Clips/MIDI/')))
-    cliplocation = './Clips/MIDI/' + person
+    person = str(random.choice(os.listdir('./Music/MIDI/')))
+    cliplocation = './Music/MIDI/' + person
     await playclip(cliplocation,ctx,client,30)
     select = random.randint(1,4)
     A,B,C,D = ' ' , ' ' , ' ' , ' '
-    samples = random.sample(os.listdir('./Clips/MIDI/'), 4)
+    samples = random.sample(os.listdir('./Music/MIDI/'), 4)
     A,B,C,D = samples[0], samples[1], samples[2], samples[3]
     while(A == person or B == person or C == person or D == person):
         print("repetition detected")
-        samples = random.sample(os.listdir('./Clips/MIDI/'), 4)
+        samples = random.sample(os.listdir('./Music/MIDI/'), 4)
         A,B,C,D = samples[0], samples[1], samples[2], samples[3]
     if (select == 1):
         A = str(person)
@@ -92,16 +73,16 @@ async def midimaniadx(ctx,client):
     msg = "It's time to for MidimaniaDX \nP \nO \nG\n You'll have 30 seconds to pick the correct song from 4 questionable choices, pick only one time"
     await ctx.send(msg, tts = True)
     await asyncio.sleep(20)
-    person = str(random.choice(os.listdir('./Clips/MIDIDX/')))
-    cliplocation = './Clips/MIDIDX/' + person
+    person = str(random.choice(os.listdir('./Music/MIDIDX/')))
+    cliplocation = './Music/MIDIDX/' + person
     await playclip(cliplocation,ctx,client,30)
     select = random.randint(1,4)
     A,B,C,D = ' ' , ' ' , ' ' , ' '
-    samples = random.sample(os.listdir('./Clips/MIDIDX/'), 4)
+    samples = random.sample(os.listdir('./Music/MIDIDX/'), 4)
     A,B,C,D = samples[0], samples[1], samples[2], samples[3]
     while(A == person or B == person or C == person or D == person):
         print("repetition detected")
-        samples = random.sample(os.listdir('./Clips/MIDIDX/'), 4)
+        samples = random.sample(os.listdir('./Music/MIDIDX/'), 4)
         A,B,C,D = samples[0], samples[1], samples[2], samples[3]
     if (select == 1):
         A = str(person)
@@ -129,47 +110,52 @@ async def midimaniadx(ctx,client):
     return answer,printable
 
 async def winnerlist(ctx,client,winners,printable,mod):
-    filename = 'longtermdata.txt'
-    with open(filename, 'r') as file:
-        data = file.readlines()
+    winnermsg = ''
+    with open("userdata.json", "r") as file:
+        data = json.load(file)
     msg = "The correct answer was " + printable + "\n\nCongratulations to:\n"
     await ctx.send(msg , tts = True)
-    if ('Baconmaster#3725' in winners):
-        await ctx.channel.send(file=discord.File('./Pics/bacon.png'))
-        data[2] = data[2] = str(int(data[2]) + mod) + '\n'
-        msg = "Sean has " + data[2].strip('\n') + " marcs!"
-        await ctx.send(msg)
-    if ('BOOF#4284' in winners):
-        await ctx.channel.send(file=discord.File('./Pics/beef.png'))
-        data[3] = str(int(data[3]) + mod) + '\n'
-        msg = "Niche has " + data[3].strip('\n') + " marcs!"
-        await ctx.send(msg)
-    if ('ratbuddy#9913' in winners):
-        await ctx.channel.send(file=discord.File('./Pics/ratto.png'))
-        data[4] = str(int(data[4]) + mod) + '\n'
-        msg = "Rat has " + data[4].strip('\n') + " marcs!"
-        await ctx.send(msg)
-    if ('ShadowXII#7240' in winners):
-        await ctx.channel.send(file=discord.File('./Pics/horse.png'))
-        data[5] = str(int(data[5]) + mod) + '\n'
-        data = (data[5].strip('\n'))
-        msg = "Marc has " + data[5].strip('\n') + " marcs!"
-        await ctx.send(msg)
-    if (len(winners) == 0):
+    if len(winners) == 0:
+        data['Flumbot#1927']['score'] = data['Flumbot#1927']['score'] + mod
         await ctx.channel.send(file=discord.File('./Pics/flumbus.png'))
-        data[6] = str(int(data[6]) + mod) + '\n'
-        msg = "Flumbot has " + data[6].strip('\n') + " marcs!"
+        msg = "Better luck next time folks! Flumbot has won, he has " + str(data['Flumbot#1927']['score']) + " marcs!"
         await ctx.send(msg)
-    else:
-        msg = 'Here is a text lineup of the winners'
-        await ctx.send(msg)
-        msg = ', '.join(winners)
-        await ctx.send(msg)
+        with open("userdata.json", "w") as file:
+            json.dump(data, file)
+        return
+    for x in winners:
+        print(x)
+        try:
+            data[x]['score'] = data[x]['score'] + mod
+        except KeyError:
+            try:
+                data[x] = data[x]
+                data[x]['score'] = mod
+            except KeyError:
+                data[x] = {}
+                data[x]['score'] = mod
+        if x == 'Baconmaster#3725':
+            await ctx.channel.send(file=discord.File('./Pics/bacon.png'))
+            msg = "Sean has " + str(data[x]['score']) + ' marcs!'
+            await ctx.send(msg)
+        if x == 'BOOF#4284':
+            await ctx.channel.send(file=discord.File('./Pics/beef.png'))
+            msg = "Niche has " + str(data[x]['score']) + " marcs!"
+            await ctx.send(msg)
+        if x == 'ShadowXII#7240':
+            await ctx.channel.send(file=discord.File('./Pics/horse.png'))
+            msg = "Marc has " + str(data[x]['score']) + " marcs!"
+            await ctx.send(msg)
+        if x == 'ratbuddy#9913':
+            await ctx.channel.send(file=discord.File('./Pics/ratto.png'))
+            msg = "Rat has " + str(data[x]['score']) + " marcs!"
+            await ctx.send(msg)
+        winnermsg = " ".join(x)
+    with open("userdata.json", "w") as file:
+        json.dump(data, file)
+    msg = "Text lineup of winners are:"
+    await ctx.send(msg)
+    await ctx.send(winnermsg)
     msg = "\n:clap::clap::clap::clap::clap::clap:\n"
     await ctx.send(msg, tts = True)
-    with open(filename , 'w') as file:
-        file.writelines(data)
-    
-    
-
 
