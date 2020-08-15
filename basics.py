@@ -12,19 +12,29 @@ import json
 import shutil
 import daystart
 
+gamestart = ''
 
 async def check(ctx,client,lister):
-    with open("userdata.json", "r") as file:
+    filename = './bin/en_data/userdata.json'
+    with open(filename, "r") as file:
         userdata = json.load(file)
-    with open("longtermdata.json", "r") as file:
+    altfilename = './bin/en_data/longtermdata.json'
+    with open(altfilename, "r") as file:
         data = json.load(file)
+    quips = './bin/en_data/quips.json'
+    with open(quips, "r") as file:
+        line = json.load(file)
     author = str(ctx.message.author)
     y = lister
+
+    for file in os.listdir("./"):
+        if file.endswith(".mp3"):
+            os.remove(file)
 
     if 'game' in lister:
         x = lister.index('game')
         data['dayvalues']['game'] = ' '.join(lister[x+1:])
-        with open("longtermdata.json", "w") as file:
+        with open(altfilename, "w") as file:
             json.dump(data, file)
         return
 
@@ -42,84 +52,107 @@ async def check(ctx,client,lister):
         except KeyError:
             userdata[author] = userdata[author]
             userdata[author]['status'] = mod
-        with open("userdata.json", "w") as file:
+        with open(filename, "w") as file:
             json.dump(userdata, file)
         return
 
     if 'flavortext' in lister:
-        filename = './quips/gamemsg.txt'
         y.remove('flavortext')
-        y = str(y) + '\n'
-        print(y)
-        char_list = ["'", "[", "]", ","]
-        for i in char_list:
-            y = y.replace(i, '')
-        with open(filename, "a") as file:
-            file.write(y)
-        msg = 'succesfully added ' + "'" + y.strip('\n') + "'" + ' to flavortext list'
+        y = ' '.join(y)
+        line['gamemsg'].append(y)
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        msg = 'succesfully added ' + "'" + y + "'" + ' to flavortext list'
         await ctx.send(msg)
+        return
 
     if 'awake' in lister:
-        filename = './quips/awakemsg.txt'
         y.remove('awake')
-        y = str(y) + '\n'
-        print(y)
-        char_list = ["'", "[", "]", ","]
-        for i in char_list:
-            y = y.replace(i, '')
-        with open(filename, "a") as file:
-            file.write(y)
-        msg = 'succesfully added ' + "'" + y.strip('\n') + "'" + ' to the startup message list'
+        y = ' '.join(y)
+        line['startmsg'].append(y)
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        msg = 'succesfully added ' + "'" + y + "'" + ' to the startup message list'
         await ctx.send(msg)
+        return
 
     if 'name' in lister:
-        filename = './quips/botlist.txt'
         y.remove('name')
-        y = str(y) + '\n'
-        char_list = ["'", "[", "]", ","]
-        for i in char_list:
-            y = y.replace(i, '')
-        with open(filename, "a") as file:
-            file.write(y)
-        msg = 'succesfully added ' + "'" + y.strip('\n') + "'" + ' to flumbot response list'
+        y = ' '.join(y)
+        line['namemsg'].append(y)
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        msg = 'succesfully added ' + "'" + y + "'" + ' to flumbot response list'
         await ctx.send(msg)
 
     if 'bet' in lister:
-        filename = './quips/betlist.txt'
         y.remove('bet')
-        y = str(y) + '\n'
-        char_list = ["'", "[", "]", ","]
-        for i in char_list:
-            y = y.replace(i, '')
-        with open(filename, "a") as file:
-            file.write(y)
-        msg = 'succesfully added ' + "'" + y.strip('\n') + "'" + ' to bet list'
+        y = ' '.join(y)
+        line['betmsg'].append(y)
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        msg = 'succesfully added ' + "'" + y + "'" + ' to bet list'
         await ctx.send(msg)
+        return
 
     if 'ad' in lister:
-        filename = './quips/adlist.txt'
         y.remove('ad')
-        y = str(y) + '\n'
-        char_list = ["'", "[", "]", ","]
-        for i in char_list:
-            y = y.replace(i, '')
-        with open(filename, "a") as file:
-            file.write(y)
-        msg = 'succesfully added ' + "'<" + y.strip('\n') + ">'" + ' to list of ads'
+        y = ' '.join(y)
+        line['adlinks'].append(y)
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        msg = 'succesfully added ' + "'<" + y + ">'" + ' to list of ads'
         await ctx.send(msg)
+        return
 
     if 'video' in lister:
-        filename = './quips/flumvideos.txt'
         y.remove('video')
-        y = str(y) + '\n'
-        print(y)
-        char_list = ["'", "[", "]", ","]
-        for i in char_list:
-            y = y.replace(i, '')
-        with open(filename, "a") as file:
-            file.write(y)
-        msg = 'succesfully added ' + "'<" + y.strip('\n') + ">'" + ' to list of flumbot streams'
+        y = ' '.join(y)
+        line['ytlinks'].append(y)
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        msg = 'succesfully added ' + "'<" + y + ">'" + ' to list of flumbot streams'
         await ctx.send(msg)
+
+    if 'channel' in lister:
+        y.remove('channel')
+        if len(y) == 1:
+            for channel in ctx.guild.text_channels:
+                if channel.name in y:
+                    for h in ctx.guild.text_channels:
+                        if h.id in data['dayvalues']['channels']:
+                            data['dayvalues']['channels'].remove(h.id)
+                    data['dayvalues']['channels'].append(channel.id)
+                    with open(altfilename, "w") as file:
+                        json.dump(data, file)
+                    msg = "New default channel is now '" + channel.name + "'"
+                    await ctx.send(msg)
+                    return
+                else:
+                    continue
+            else:
+                msg = "channel not found, try checking the name, this command is case sensitive"
+                await ctx.send(msg)
+        else:
+            msg = "use the form 'flum channel (name)' this command is case sensitive"
+            await ctx.send(msg)
+
+    if 'color' in lister:
+        if len(y) != 4:
+            msg = "please type in the format 'flum color r g b'"
+            await ctx.send(msg)
+            return
+        try:
+            userdata[author]['color'] = (int(y[1]), int(y[2]), int(y[3]))
+        except KeyError:
+            msg = 'type inventory first before doing this'
+            await ctx.send(msg)
+            return
+        msg = 'Successfully changed your color!'
+        await ctx.send(msg)
+        with open(filename, "w") as file:
+            json.dump(userdata, file)
+        return
 
     if 'mp3' in lister:
         y.remove('mp3')
@@ -158,6 +191,8 @@ async def check(ctx,client,lister):
         embed.add_field(name='video', value='what game flumbot is streaming or playing, use only youtube/twitch links')
         embed.add_field(name='mp3', value='add some content to flumbot, please no 10 hour videos, only do youtube links')
         embed.add_field(name='status', value='what is the flum status for tonight?')
+        embed.add_field(name='channel', value='format is "flum channel (name)" this sets where default bot '
+                                              'communication is')
         embed.set_thumbnail(url=daystart.getad())
         await ctx.send(embed=embed)
 
@@ -211,7 +246,8 @@ async def fortune(ctx, client):
         await ctx.send(msg, tts=True)
 
 async def checkinv(ctx, client):
-    with open("userdata.json", "r") as file:
+    filename = './bin/en_data/userdata.json'
+    with open(filename, "r") as file:
         userdata = json.load(file)
     user = str(ctx.message.author)
     try:
@@ -291,12 +327,13 @@ async def checkinv(ctx, client):
                         value="Ran out of Ideas lol, but here is a math book")
         embed.set_image(url='https://images-na.ssl-images-amazon.com/images/I/41bv5SmS6NL._SX368_BO1,204,203,200_.jpg')
         await ctx.send(embed=embed)
-    with open("userdata.json", "w") as file:
+    with open(filename, "w") as file:
         json.dump(userdata, file)
     return
 
 async def shopfront(ctx,client,args):
-    with open("userdata.json", "r") as file:
+    filename = './bin/en_data/userdata.json'
+    with open(filename, "r") as file:
         userdata = json.load(file)
     author = ctx.message.author
 
@@ -400,7 +437,7 @@ async def shopfront(ctx,client,args):
     userdata[user]['score'] = userdata[user]['score'] - price
     userdata[user]['inventory'] = userdata[user]['inventory'] + item
     msg = "You now have " + str(userdata[user]['score']) + " marcs!\nThank you for shopping Flumbot!"
-    with open("userdata.json", "w") as file:
+    with open(filename, "w") as file:
         json.dump(userdata, file)
     await ctx.send(msg)
     return
@@ -491,7 +528,7 @@ async def rollthedice(ctx,args):
             await ctx.send(msg)
             return
         if ((int(roll) == 1) and (sides == 20)):
-            await asycnio.sleep(2)
+            await asyncio.sleep(2)
             msg = '<:monkaS:583814789298651154>'
             await ctx.send(msg)
             if ('+' in x):
@@ -519,9 +556,11 @@ async def rollthedice(ctx,args):
         return
 
 async def daily(ctx):
-    with open("userdata.json", "r") as file:
+    filename = './bin/en_data/userdata.json'
+    with open(filename, "r") as file:
         userdata = json.load(file)
-    with open("longtermdata.json", "r") as file:
+    altfilename = './bin/en_data/longtermdata.json'
+    with open(altfilename, "r") as file:
         data = json.load(file)
     today = date.today()
     now = datetime.datetime.now()
@@ -562,10 +601,10 @@ async def daily(ctx):
                     userdata[i]['score'] = mod
         msg = str(user[:-5]) + ' has ' + str(userdata[user]['score']) + ' marcs!'
         await ctx.send(msg)
-        with open("longtermdata.json", "w") as file:
+        with open(altfilename, "w") as file:
             json.dump(data, file)
-        with open("userdata.json", "w") as file:
-                json.dump(userdata, file)
+        with open(filename, "w") as file:
+            json.dump(userdata, file)
     else:
         bet = int(dt_string) - 1900
         if (bet > 0):
@@ -574,3 +613,54 @@ async def daily(ctx):
         else:
             msg = "Appreciate the enthusiam but, wait till everyone else is awake and flumcabale"
             await ctx.send(msg)
+
+async def welcome(client,guild):
+    channel = guild.text_channels[0]
+    msg = "Welcome to Flumbot, the official bot of Flum. A bot where you create half the content this bot has! I " \
+          "am going to ask you type the preferred text channel for me to spam chat in. The next message sent will be " \
+          "the text channel I look for, note this is case sensitive. You can change this later with the command " \
+          "'flum channel'. I recommend starting by typing 'flum help', simply 'help', or jump straight into things " \
+          "and hop in a voice channel and type 'midimania'\nHave Fun! Enjoy the Bot :) "
+    await channel.send(msg)
+    altfilename = './bin/en_data/longtermdata.json'
+    with open(altfilename, "r") as file:
+        data = json.load(file)
+
+    def checkit(m):
+        message = m.content
+        for channel in guild.text_channels:
+            if channel.name == message:
+                number = int(channel.id)
+                data['dayvalues']['channels'].append(number)
+                global gamestar
+                gamestar = "Default Channel set to '" + message + "' use 'flum channel' to change it'"
+                with open(altfilename, "w") as file:
+                    json.dump(data, file)
+                return True
+            else:
+                continue
+        return
+
+    try:
+        await client.wait_for('message', check=checkit, timeout=900)
+        await channel.send(gamestar)
+        return
+
+    except asyncio.TimeoutError:
+        data['dayvalues']['channels'].append(int(guild.text_channels[0].id))
+        with open(altfilename, "w") as file:
+            json.dump(data, file)
+        msg = "Default Channel set to " + guild.text_channels[0].name + " use 'flum channel' to change it'"
+        guild.text_channels[0].send(msg)
+
+
+async def killed(client, guild):
+    altfilename = './bin/en_data/longtermdata.json'
+    with open(altfilename, "r") as file:
+        data = json.load(file)
+    for x in guild.text_channels:
+        if x.id in data['dayvalues']['channels']:
+            data['dayvalues']['channels'].remove(x.id)
+    with open(altfilename, "w") as file:
+        json.dump(data, file)
+    print('successfully removed the traitors')

@@ -1,13 +1,17 @@
+
 from __future__ import unicode_literals
 import discord
 import asyncio
 import random
 import os
 import datetime
+import miditoaudio
 import basics
 import daystart
 import messager
 import voicememe
+import json
+from PIL import Image, ImageFont, ImageDraw
 from gtts import gTTS
 from discord.ext import commands
 from datetime import date
@@ -17,7 +21,7 @@ from datetime import date
 
 today = date.today()
 now = datetime.datetime.now()
-token = 'notforyou'
+token = 'NTQ5OTk2NDI0NDIzNTM4Njg4.XrBXDA.5iJaE1Hxk10b-tNPZJMgub_bsik'
 client = commands.Bot(command_prefix='', case_insensitive=True, )
 x = 0
 pilot = 0
@@ -35,29 +39,33 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
+    await daystart.profile(client)
+    altfilename = './bin/en_data/longtermdata.json'
+    with open(altfilename, "r") as file:
+        data = json.load(file)
     await client.change_presence(activity=daystart.activity())
-    channel = client.get_channel(137921870010777600)
-    deltaday = daystart.days()
-
     if daystart.datecheck() == 0:
         print('already spammed chat today do not send wake message')
         return
-    if (deltaday % 365) == 0:
-        x = deltaday
-        while x != 0:
-            await asyncio.sleep(2)
-            msg = "HAPPY FLUM YEAR\nGIVE IT UP FOR " + str(deltaday / 365) + " YEAR(s) OF FLUMBOT!!!\n"
-            await channel.send(msg, tts=True)
-            print('wrong')
-            x -= 1
 
-    msg = daystart.awake()
-    await channel.send(msg)
+    for channel in data['dayvalues']['channels']:
+        channel = client.get_channel(channel)
+        deltaday = daystart.days()
+        if (deltaday % 365) == 0:
+            x = deltaday
+            while x != 0:
+                await asyncio.sleep(2)
+                msg = "HAPPY FLUM YEAR\nGIVE IT UP FOR " + str(deltaday / 365) + " YEAR(s) OF FLUMBOT!!!\n"
+                await channel.send(msg, tts=True)
+                print('wrong')
+                x -= 1
+        msg = daystart.awake()
+        await channel.send(msg)
 
-    msg = "Give it up for Day " + str(deltaday) + "! Day " + str(deltaday) + "!"
-    await channel.send(msg)
+        msg = "Give it up for Day " + str(deltaday) + "! Day " + str(deltaday) + "!"
+        await channel.send(msg)
 
-    await channel.send(daystart.link())
+        await channel.send(daystart.link())
 
 
 # if anyone deletes a message do this I'll have no hidden messages from me
@@ -65,10 +73,21 @@ async def on_ready():
 async def on_message_delete(message):
     author = str(message.author)
     content = str(message.content)
-    msg = 'Ladies and gentlemen, ' + '@' + author + " said, " + \
-          content + ", which they promptly deleted. Making them tonight's biggest loser"
+    if author == 'Flumbot#1927':
+        return
+    msg = 'Ladies and gentlemen, ' + '@' + author + " said, '" + content + "', which they promptly deleted. Making them tonight's biggest loser"
     await message.channel.send(msg)
 
+
+@client.event
+async def on_guild_remove(guild):
+    print('we lost one :(')
+    await basics.killed(client, guild)
+
+@client.event
+async def on_guild_join(guild):
+    print('we got a new one boys!!!!!!')
+    await basics.welcome(client, guild)
 
 @client.event
 async def on_typing(channel, user, when):
@@ -91,23 +110,13 @@ async def on_reaction_add(reaction, user):
     global winners
     global answer
     global cheaters
-    print(user)
     if str(user) in winners or str(user) in cheaters:
         print(str(user) + ' already answered')
         return
     if str(user) == 'Flumbot#1927':
         return
     if answer == reaction.emoji:
-        if str(user) == 'BOOF#4284':
-            winners.append(str(user))
-        if str(user) == 'ratbuddy#9913':
-            winners.append(str(user))
-        if str(user) == 'ShadowXII#7240':
-            winners.append(str(user))
-        if str(user) == 'Baconmaster#3725':
-            winners.append(str(user))
-        else:
-            winners.append(str(user))
+        winners.append(str(user))
         return
     cheaters.append(str(user))
 
@@ -120,8 +129,8 @@ async def on_message(message):
     messagetobot = str(message.content)
     splitme = str(messagetobot.lower())
     global username
-    global data
-    data = messagetobot
+    global dater
+    dater = messagetobot
     username = str(message.author)
     username = username[:-5]
     print(username)
@@ -135,6 +144,12 @@ async def on_message(message):
         await message.channel.send(file=discord.File('./Pics/doyou.png'))
         await asyncio.sleep(5)
         await message.channel.send(file=discord.File('./Pics/hedo.png'))
+
+    if 'default dance' in messagetobot.lower():
+        await messager.default_dance(message,client)
+
+    if 'hey peter' in messagetobot.lower():
+        await messager.peter(message)
 
     # never forget when :b: was standard
     if 'b-time' in messagetobot.lower():
@@ -454,6 +469,7 @@ async def autopilot(ctx, *args):
     while (pilot == 1):
         if (timer > 1500):
             timer = 0
+            continue
         await asyncio.sleep(timer)
         if (pilot == 0):
             return
@@ -464,7 +480,9 @@ async def autopilot(ctx, *args):
                     mp3files.append(os.path.join(dirpath, x))
         cliplocation = random.choice(mp3files)
         print(cliplocation)
-        await voicememe.playclip(cliplocation, ctx, client, 0)
+        if not (await voicememe.playclip(cliplocation, ctx, client, 0)):
+            pilot = 0
+            continue
         timer = timer + random.randint(30, 100)
         print('waiting ' + str(timer) + ' seconds before next clip')
 
@@ -473,25 +491,31 @@ async def autopilot(ctx, *args):
 @commands.cooldown(1, 10, commands.BucketType.user)
 async def tts(ctx, *args):
     global pilot
-    global data
     global username
+    global dater
+    filename = './bin/en_data/longtermdata.json'
+    with open(filename, "r") as file:
+        data = json.load(file)
     pilot = 1
-    if 'text.mp3' in os.listdir('./'):
-        os.remove('text.mp3')
-    while (pilot != 0):
-        if (data == 'null' or data == 'tts'):
-            await asyncio.sleep(1)
+    while pilot > 0:
+        with open(filename, "r") as file:
+            data = json.load(file)
+        text = username + ' said...' + dater
+        if dater == 'tts':
             continue
-        text = username + ' said... ' + str(data)
-        langlist = ['en-ca']
-        language = random.choice(langlist)
-        speech = gTTS(text=text, lang=language, slow=False)
-        speech.save("text.mp3")
-        cliplocation = 'text.mp3'
-        await voicememe.playclip(cliplocation, ctx, client, 0)
-        os.remove('text.mp3')
-        data = 'null'
-
+        data['dayvalues']['tts'].append(text)
+        if len(data['dayvalues']['tts']) > 0:
+            text = data['dayvalues']['tts'][0]
+            speech = gTTS(text=text, lang='en-ca', slow=False)
+            speech.save("text.mp3")
+            await voicememe.playclip('text.mp3', ctx, client, 0)
+            os.remove('text.mp3')
+            data['dayvalues']['tts'].remove(data['dayvalues']['tts'][0])
+        else:
+            dater = 'tts'
+            asyncio.sleep(2)
+        with open(filename, "w") as file:
+            json.dump(data, file)
 
 @client.command(pass_context=True, name='restart', help='kill flumbot only to make him stronger')
 @commands.cooldown(1, 10, commands.BucketType.user)
@@ -512,10 +536,19 @@ async def music(ctx, *args):
     global pilot
     pilot = 1
     while (pilot == 1):
-        person = str(random.choice(os.listdir('./Music/MIDI/')))
-        cliplocation = './Music/MIDI/' + person
-        await voicememe.playclip(cliplocation, ctx, client, 0)
+        midifiles = []
+        for dirpath, subdirs, files in os.walk('./Music/MIDI'):
+            for x in files:
+                if x.endswith(".mid"):
+                    midifiles.append(os.path.join(dirpath, x))
+        cliplocation = random.choice(midifiles)
+        miditoaudio.to_audio('./Music/OPL2.sf2', cliplocation, './', out_type='wav')
+        person = os.path.split(cliplocation)
+        person = person[1]
+        place = str(person[:-4]) + '.wav'
+        await voicememe.playclip(place, ctx, client, 0)
         await asyncio.sleep(2)
+        os.remove(place)
         print('waited, playing next song')
 
 
@@ -563,6 +596,44 @@ async def roll(ctx, *args):
 async def checkin(ctx, *args):
     await basics.daily(ctx)
 
+@client.command(pass_context=True, name='revel', help='OK Gamers')
+@commands.cooldown(1, 10, commands.BucketType.user)
+async def revel(ctx, *args):
+    await voicememe.youtubelink(ctx,client)
+
+@client.command(pass_context=True, name='geddit', help="Let's GEDDIT")
+@commands.cooldown(1, 10, commands.BucketType.user)
+async def geddit(ctx, *args):
+    global cheaters
+    cheaters.clear()
+    global answer
+    answer, printable, link = await voicememe.geddit(ctx, client)
+    await asyncio.sleep(30)
+    global winners
+    await voicememe.winnerlist(ctx, client, winners, printable, 25)
+    msg = "The post was <" + link + ">"
+    await ctx.send(msg)
+    winners.clear()
+    return
+
+@client.command(pass_context=True, name='gedditdx', help="Let's GEDDITDX")
+@commands.cooldown(1, 10, commands.BucketType.user)
+async def gedditdx(ctx, *args):
+    args = list(args)
+    args = ''.join(args)
+    if len(args) < 1:
+        msg ="use the format 'gedditdx (subreddit)'"
+        await ctx.send(msg)
+        return
+    global cheaters
+    cheaters.clear()
+    global answer
+    answer, printable = await voicememe.gedditdx(ctx, client, args)
+    await asyncio.sleep(30)
+    global winners
+    await voicememe.winnerlist(ctx, client, winners, printable, 35)
+    winners.clear()
+    return
 
 @client.command(pass_context=True, name='off', help='Turn off autopilot :(')
 @commands.cooldown(1, 10, commands.BucketType.user)

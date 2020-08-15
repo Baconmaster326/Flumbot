@@ -1,48 +1,50 @@
-import random
-import discord
-import urllib.request
-import string
 import json
-from random import choice
+import os
+import random
+import shutil
+import string
+import urllib.request
 from datetime import date
+from random import choice
+from PIL import Image
 from urllib.error import HTTPError
+
+import discord
+import requests
 
 
 def game():
-    filename = './quips/gamemsg.txt'
-    with open(filename, 'r') as file:
-        data = file.readlines()
-    game = str(random.choice(data))
+    quips = './bin/en_data/quips.json'
+    with open(quips, "r") as file:
+        line = json.load(file)
+    game = str(random.choice(line['gamemsg']))
     return game
 
 
 def getad():
-    filename = './quips/adlist.txt'
-    with open(filename, 'r') as file:
-        data = file.readlines()
-    ad = str(random.choice(data))
+    quips = './bin/en_data/quips.json'
+    with open(quips, "r") as file:
+        line = json.load(file)
+    ad = str(random.choice(line['adlinks']))
     return ad
 
 
 def awake():
-    filename = './quips/awakemsg.txt'
-    with open(filename, 'r') as file:
-        data = file.readlines()
-    awake = str(random.choice(data))
+    quips = './bin/en_data/quips.json'
+    with open(quips, "r") as file:
+        line = json.load(file)
+    awake = str(random.choice(line['startmsg']))
     return awake
 
 
 def activity():
-    if random.randint(0, 1) == 1:
-
+    quips = './bin/en_data/quips.json'
+    with open(quips, "r") as file:
+        line = json.load(file)
+    if random.randint(0, 100) > 75:
         return discord.Game(name=game())
-
     else:
-        filename = './quips/flumvideos.txt'
-        with open(filename, 'r') as file:
-            data = file.readlines()
-
-        return discord.Streaming(name=game(), url=str(random.choice(data)))
+        return discord.Streaming(name=game(), url=str(random.choice(line['ytlinks'])))
 
 
 def days():
@@ -54,10 +56,11 @@ def days():
 def datecheck():
     today = date.today()
     start = today - date(2019, 2, 26)
-
-    with open("longtermdata.json", "r") as file:
+    filename = './bin/en_data/userdata.json'
+    altfilename = './bin/en_data/longtermdata.json'
+    with open(altfilename, "r") as file:
         data = json.load(file)
-    with open("userdata.json", "r") as file:
+    with open(filename, "r") as file:
         userdata = json.load(file)
     # check if bot has restarted today already
     if int(start.days) == data['dayvalues']['days']:
@@ -83,11 +86,47 @@ def datecheck():
                 userdata[x]['status'] = 0
             if x == 'ratbuddy#9913' or x == 'Dunsparce#0080':
                 userdata[x]['status'] = -1
-        with open("userdata.json", "w") as file:
+        with open(filename, "w") as file:
             json.dump(userdata, file)
-        with open("longtermdata.json", "w") as file:
+        with open(altfilename, "w") as file:
             json.dump(data, file)
         return 1
+
+
+async def profile(client):
+    if random.randint(1, 100) > 10:
+        selector = random.randint(0, 1)
+        with open('./Pics/big' + str(selector) + '.png', 'rb') as f:
+            await client.edit_profile(avatar=f.read())
+        return
+    else:
+        headers = {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/78.0.3904.108 Safari/537.36 '
+        }
+        currentDir = os.getcwd()
+        path = currentDir  # saving images to Images folder
+        url = 'https://www.thispersondoesnotexist.com/image'
+        attempts = 0
+        while attempts < 5:  # retry 5 times
+            try:
+                filename = 'image.jpg'
+                r = requests.get(url, headers=headers, stream=True, timeout=5)
+                if r.status_code == 200:
+                    with open(os.path.join(path, filename), 'wb') as f:
+                        r.raw.decode_content = True
+                        shutil.copyfileobj(r.raw, f)
+                break
+            except Exception as e:
+                attempts += 1
+                print(e)
+        image = Image.open('image.jpg')
+        width, height = image.size
+        image = image.crop(((width/4), ((height/4)+50), (3*width/4), ((3*height/4)+100)))
+        image.save('image.jpg')
+        with open('image.jpg', 'rb') as f:
+            await client.user.edit(avatar=f.read())
+        os.remove('image.jpg')
 
 
 def link():
