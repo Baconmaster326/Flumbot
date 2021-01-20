@@ -3,14 +3,12 @@ import os
 import random
 import shutil
 import string
-import urllib.request
+import cv2
 from datetime import date
-from random import choice
-from PIL import Image
-from urllib.error import HTTPError
-
 import discord
+import imgur_downloader
 import requests
+from PIL import Image
 
 
 def game():
@@ -41,9 +39,6 @@ def activity():
     quips = './bin/en_data/quips.json'
     with open(quips, "r") as file:
         line = json.load(file)
-    if random.randint(0, 100) > 75:
-        return discord.Game(name=game())
-    else:
         return discord.Streaming(name=game(), url=str(random.choice(line['ytlinks'])))
 
 
@@ -97,7 +92,7 @@ async def profile(client):
     if random.randint(1, 100) > 10:
         selector = random.randint(0, 1)
         with open('./Pics/big' + str(selector) + '.png', 'rb') as f:
-            await client.edit_profile(avatar=f.read())
+            await client.user.edit(avatar=f.read())
         return
     else:
         headers = {
@@ -130,24 +125,67 @@ async def profile(client):
 
 
 def link():
-    opener = urllib.request.build_opener()
-    opener.add_headers = [("User-agent", "Mozilla/5.0")]
-
-    chars = string.ascii_letters + string.digits
-
-    while True:
-
-        imgPart = ''
-        for i in range(5):
-            imgPart += choice(chars)
-        url = "http://i.imgur.com/" + imgPart
-
+    fails = 1
+    imgur_url = "http://i.imgur.com/"
+    selection = string.ascii_letters + string.digits
+    leng = random.choices(population=[5, 6, 7], weights=[.6, .3, .1])
+    leng = leng[0]
+    ext = [".png", ".jpg", ".gif"]
+    ext = random.choice(ext)
+    while fails == 1:
+        r1, r2, r3, r4, r5, r6, r7 = random.sample(selection, 7)
+        if leng == 7:
+            print("Trying Length 7 links")
+            code = r1 + r2 + r3 + r4 + r5 + r6 + r7
+        elif leng == 6:
+            print("Trying Length 6 links")
+            code = r1 + r2 + r3 + r4 + r5 + r6
+        else:
+            print("Trying Length 5 links")
+            code = r1 + r2 + r3 + r4 + r5
+        file_name = code
+        full_url = imgur_url + file_name + ext
+        downloader = imgur_downloader.ImgurDownloader(full_url, './Pics/dump')
+        success, fails = downloader.save_images()
+        images = os.listdir('./Pics/dump')
         try:
-            opener.open(url)
-            print(url)
-            msg = "||" + url + "||"
-            return msg
-            if open:
-                system("open " + url)
-        except HTTPError:
-            print("found one that don't work")
+            image = images[0]
+        except IndexError:
+            fails = 1
+            continue
+        if fails == 1:
+            os.remove('./Pics/dump/' + image)
+            print("Found one that didn't work")
+            continue
+        if '.mp4' in image:
+            vid = cv2.VideoCapture('./Pics/dump/' + image)
+            height = vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+            width = vid.get(cv2.CAP_PROP_FRAME_WIDTH)
+            vid.release()
+            if height < 200 and width < 200:
+                fails = 1
+                os.remove('./Pics/dump/' + image)
+                print("found one that didn't work")
+                continue
+            else:
+                print(imgur_url + image[:-3] + 'gif')
+                os.rename('./Pics/dump/' + image, './Pics/dump/SPOILER_' + image)
+                return './Pics/dump/SPOILER_' + image
+            
+        try:
+            im1 = Image.open('./Pics/dump/' + image)
+        except OSError:
+            fails = 1
+            os.remove('./Pics/dump/' + image)
+            print("found one that didn't work")
+            continue
+        if im1.height < 200 and im1.width < 200:
+            fails = 1
+            im1.close()
+            os.remove('./Pics/dump/' + image)
+            print("found one that didn't work")
+        else:
+            print(imgur_url + image)
+            im1.close()
+            os.rename('./Pics/dump/' + image, './Pics/dump/SPOILER_' + image)
+            return './Pics/dump/SPOILER_' + image

@@ -16,11 +16,16 @@ from discord.utils import get
 
 
 async def playclip(cliplocation, ctx, client, overide):
+
+    def check(m):
+        return m.content.lower() == 'stop' or m.content.lower() == 'skip'
+
+    
     try:
         channel = ctx.message.author.voice.channel
     except AttributeError:
-        msg = "Can't Fool me :triumph: you aren't even in the voice chat :triumph:"
-        await ctx.send(msg)
+        #msg = "Can't Fool me :triumph: you aren't even in the voice chat :triumph:"
+        #await ctx.send(msg)
         return False
     print('starting to play clip')
     duration = librosa.get_duration(filename=cliplocation) + 1
@@ -32,15 +37,28 @@ async def playclip(cliplocation, ctx, client, overide):
         await voice.move_to(channel)
     else:
         voice = await channel.connect()
+    if duration > 60:
+        source = FFmpegPCMAudio("./Clips/Oneoff/alert.wav")
+        source = discord.PCMVolumeTransformer(source)
+        source.volume = 10.0
+        player = voice.play(source)
+        await asyncio.sleep(5)
+        player = voice.stop()
+        await asyncio.sleep(1)
     source = FFmpegPCMAudio(cliplocation)
     source = discord.PCMVolumeTransformer(source)
-    source.volume = 1.5
+    source.volume = 10.0
     player = voice.play(source)
-    await asyncio.sleep(duration)
-    player = voice.stop()
-    await ctx.voice_client.disconnect()
-    print('done playing clip')
-    return
+    try:
+        await client.wait_for('message', check=check, timeout=duration)
+        player = voice.stop()
+        print('done playing clip')
+        await ctx.voice_client.disconnect()
+    except asyncio.TimeoutError:
+        player = voice.stop()
+        await ctx.voice_client.disconnect()
+        print('done playing clip')
+        return
 
 
 async def midimania(ctx, client):
@@ -183,14 +201,17 @@ async def winnerlist(ctx, client, winners, printable, mod):
         return
     for x in winners:
         try:
+            # add normally
             data[x]['score'] = data[x]['score'] + mod
         except KeyError:
+            # no wallet found
             try:
-                data[x] = data[x]
                 data[x]['score'] = mod
             except KeyError:
+                # no entry found
                 data[x] = {}
                 data[x]['score'] = mod
+
         im = Image.open("./Pics/blank.png")
         d = ImageDraw.Draw(im)
         location = (0, 10)
@@ -199,29 +220,12 @@ async def winnerlist(ctx, client, winners, printable, mod):
         im.save("person.png")
         await ctx.channel.send(file=discord.File('person.png'))
         os.remove('person.png')
-        msg = x[:-5] + " has " + str(data[x]['score']) + " marcs!"
+        msg = x[:-5] + " has " + str(data[x]["score"]) + " marcs!"
         await ctx.send(msg)
     with open(filename, "w") as file:
         json.dump(data, file)
     msg = "\n:clap::clap::clap::clap::clap::clap:\n"
     await ctx.send(msg, tts=True)
-
-
-async def youtubelink(ctx, client):
-    count = 50
-    API_KEY = 'AIzaSyD4QesFxKLYX1DzTNjLShLuDG9alAwD0m0'
-    random = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(3))
-
-    urlData = "https://www.googleapis.com/youtube/v3/search?key={}&maxResults={}&part=snippet&type=video&q={}".format(
-        API_KEY, count, random)
-    webURL = urllib.request.urlopen(urlData)
-    data = webURL.read()
-    encoding = webURL.info().get_content_charset('utf-8')
-    results = json.loads(data.decode(encoding))
-
-    for data in results['items']:
-        videoId = (data['id']['videoId'])
-        print(videoId)
 
 async def getpicture(links):
     x = 0

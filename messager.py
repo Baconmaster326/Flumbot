@@ -4,11 +4,6 @@ import asyncio
 
 
 def check(ctx):
-    print(ctx)
-    if ('ok marc') in ctx:
-        msg = 'ok marc'
-        return msg
-
     if ('bet') in ctx.split():
         quips = './bin/en_data/quips.json'
         with open(quips, "r") as file:
@@ -18,7 +13,7 @@ def check(ctx):
         return msg, flag
 
     if ('good bot' in ctx) or ('bad bot' in ctx):
-        with open("longtermdata.json", "r") as file:
+        with open("./bin/en_data/longtermdata.json", "r") as file:
             data = json.load(file)
         if ('bad bot') in ctx:
             data['dayvalues']['goodness'] = data['dayvalues']['goodness'] - 1
@@ -28,7 +23,7 @@ def check(ctx):
             data['dayvalues']['goodness'] = data['dayvalues']['goodness'] + 1
             msg = 'Thank :clap: you :clap: are :clap: the :clap: ' + str(
                 data['dayvalues']['goodness']) + 'th :clap: person :clap: to :clap: thank :clap: me. :clap:'
-        with open("longtermdata.json", "w") as file:
+        with open("./bin/en_data/longtermdata.json", "w") as file:
             json.dump(data, file)
         flag = True
         return msg, flag
