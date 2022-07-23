@@ -1,13 +1,20 @@
 import asyncio
+import threading
+
 import discord
+import requests
+import youtube_dl
 from discord.ext import bridge
 from discord.ext.commands import CommandNotFound
 import check_raw_text
 import check_count
 import voiceplay
 import os
+import json
 import random
 import games
+import daystart
+import shutil
 
 pilot = 0
 
@@ -21,7 +28,48 @@ async def on_ready():
     print(client.user.id)
     print('---------')
 
+    altfilename = './bin/en_data/longtermdata.json'
 
+    with open(altfilename, "r") as file:
+        data = json.load(file)
+    # flavortext change
+    await client.change_presence(activity=await daystart.activity())
+    # we started today already?
+    if daystart.datecheck() == 0:
+        print('\n-----already spammed chat today do not send wake message-----\n')
+        return
+
+    #  change profile picture
+    #await daystart.profile(client)
+
+    # for each channel we a part of
+    for channel in data['dayvalues']['channels']:
+        channel = client.get_channel(channel)
+        deltaday = daystart.days()
+        # flum new year process
+        if (deltaday % 365) == 0:
+            x = deltaday
+            while x != 0:
+                await asyncio.sleep(2)
+                msg = "HAPPY FLUM YEAR\nGIVE IT UP FOR " + str(deltaday / 365) + " YEAR(s) OF FLUMBOT!!!\n"
+                await channel.send(msg, tts=True)
+                print('wrong')
+                x -= 1
+
+        # send random awake message
+        msg = daystart.awake()
+        await channel.send(msg)
+        msg = f"Give it up for Day {deltaday}! Day {deltaday}!"
+        await channel.send(msg)
+        # send which type of link, imgur or lightshot?
+        if random.randint(0, 10) > 3:
+            link = await daystart.link()
+            await channel.send(file=discord.File(link))
+            os.remove(link)
+        else:
+            link = await daystart.link2()
+            await channel.send(file=discord.File(link))
+            os.remove(link)
 
 @client.event
 async def on_message(message):
@@ -311,6 +359,164 @@ async def roll(ctx, sidedness: discord.Option(int), times: discord.Option(int), 
 
     await ctx.respond(content=str, ephemeral=True, delete_after=float(30))
 
+@client.bridge_command(name='flum', description='various flum editing commands, it is amazing!', pass_context=True)
+async def flum(ctx, action: discord.Option(str), arg: discord.Option(str)):
+    quips = './bin/en_data/quips.json'
+    altfilename = './bin/en_data/longtermdata.json'
+
+    action = action.lower().split()
+    if len(action) > 1:
+        return
+
+    with open(altfilename, "r") as file:
+        data = json.load(file)
+    with open(quips, "r") as file:
+        line = json.load(file)
+
+    for file in os.listdir("./"):
+        if file.endswith(".mp3"):
+            os.remove(file)
+
+    if 'flavortext' in action:
+        line['gamemsg'].append(arg)
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        msg = f"Succesfully added {arg} to flavortext list!"
+        await ctx.send(msg, ephemeral=True, delete_after=3)
+        return
+
+    if 'awake' in action:
+        line['startmsg'].append(arg)
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        msg = f"Successfully added {arg} to the startup messages list!"
+        await ctx.send(msg)
+        return
+
+    if 'name' in action:
+        line['namemsg'].append(arg)
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        msg = f"Successfully added {arg} to the flumbot response list!"
+        await ctx.send(msg, ephemeral=True, delete_after=3)
+
+    if 'bet' in action:
+        line['betmsg'].append(arg)
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        msg = f"Successfully added {arg} to the bet list!"
+        await ctx.send(msg, ephemeral=True, delete_after=3)
+        return
+
+    if 'ad' in action:
+        line['adlinks'].append(arg)
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        msg = f"Successfully added <{arg}> to the list of ads"
+        await ctx.send(msg, ephemeral=True, delete_after=3)
+        return
+
+    if 'purge' in action:
+        newlist = []
+        for each in line['ytlinks']:
+            if ('user' in each) or ('twitch' in each) or ('youtu.be' in each):
+                await ctx.send("Purged video... " + str(each))
+                continue
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'cookiefile': 'cookies.txt',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '12',
+                }],
+            }
+            try:
+                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([each])
+            except:
+                await ctx.send("Purged video..." + str(each))
+                continue
+            for file in os.listdir('./'):
+                if file.endswith(".mp3"):
+                    location = os.path.join("./", file)
+                    os.remove(location)
+            newlist.append(each)
+        line['ytlinks'] = newlist
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        await ctx.send("COMPLETED PURGE")
+        print("done")
+
+
+
+    if 'video' in action:
+        full_url = arg
+
+        request = requests.get(full_url)
+        if not ("Video unavailable" in request.text or "Private video" in request.text):
+            print("real")
+        else:
+            print("dead")
+            ctx.respond("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
+            return
+
+        if "youtu.be" in full_url:
+            link = full_url.split("/")
+            full_url = "https://www.youtube.com/watch?v=" + link[3]
+        if "/shorts/" in full_url:
+            link = full_url.split("/")
+            full_url = "https://www.youtube.com/watch?v=" + link[4]
+        if full_url in line['ytlinks']:
+            await ctx.respond("Already in the list boss...", ephemeral=True, delete_after=3)
+            return
+        line['ytlinks'].append(full_url)
+        with open(quips, "w") as file:
+            json.dump(line, file)
+        msg = f"Successfully added <{full_url}> to the flum stream"
+        await ctx.send(msg, ephemeral=True, delete_after=3)
+
+    if 'mp3' in action:
+        link = arg
+        request = requests.get(link)
+
+        if not ("Video unavailable" in request.text or "Private video" in request.text):
+            print("real")
+        else:
+            print("dead")
+            ctx.respond("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
+            return
+        await ctx.respond(f"Adding <{link}> to the queue to download!", ephemeral=True, delete_after=3)
+        threading.Thread(target=entry, args=(link, ctx), daemon=True).start()
+
+async def download(link, ctx):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'cookiefile': 'cookies.txt',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([link])
+    for file in os.listdir('./'):
+        if file.endswith(".mp3"):
+            location = os.path.join("./", file)
+    try:
+        shutil.move(location, './Clips/usersub')
+    except:
+        print(f"Duplicate clip <{link}> not added")
+        for file in os.listdir("./"):
+            if file.endswith(".mp3"):
+                os.remove(file)
+        return
+    print(f"Successfully added <{link}> to user submissions folder")
+
+def entry(link, ctx):
+    asyncio.run(download(link, ctx))
+
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, CommandNotFound):
@@ -318,4 +524,4 @@ async def on_command_error(ctx, error):
         return
     raise error
 
-client.run("OTk5NDg2Njg5Mjc1ODI2MjY2.GF5FTx.vYGFLAZdxvrF8iJB2MDrOzUa36jZ2NbmeQ5vDQ")
+client.run("OTk5NDg2Njg5Mjc1ODI2MjY2.GZW8bZ.N79F0vx-mJksMFZVCCNlKsahVXzWq9Rmq1hu8M")
