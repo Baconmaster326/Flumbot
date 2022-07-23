@@ -20,6 +20,10 @@ pilot = 0
 
 client = bridge.Bot(command_prefix='', intents=discord.Intents.all(), case_insensitive=True)
 
+with open('token.json', "r") as file:
+    data = json.load(file)
+token = data['token']
+
 @client.event
 async def on_ready():
     print('---------')
@@ -524,4 +528,4 @@ async def on_command_error(ctx, error):
         return
     raise error
 
-client.run("OTk5NDg2Njg5Mjc1ODI2MjY2.GZW8bZ.N79F0vx-mJksMFZVCCNlKsahVXzWq9Rmq1hu8M")
+client.run(token)
