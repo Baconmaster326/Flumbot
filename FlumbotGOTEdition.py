@@ -1,11 +1,12 @@
 import asyncio
 import threading
-
+import datetime
 import discord
 import requests
 import youtube_dl
 from discord.ext import bridge
 from discord.ext.commands import CommandNotFound
+from datetime import date
 import check_raw_text
 import check_count
 import voiceplay
@@ -324,6 +325,67 @@ async def sports(ctx):
     person = str(random.choice(os.listdir('./Clips/sports/')))
     cliplocation = './Clips/sports/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
+
+@client.bridge_command(name='check-in', description='check in for daily marcs, only avaliable at 7:00 EDT/EST', pass_context=True)
+async def checkin(ctx):
+    filename = './bin/en_data/userdata.json'
+    with open(filename, "r") as file:
+        userdata = json.load(file)
+    altfilename = './bin/en_data/longtermdata.json'
+    with open(altfilename, "r") as file:
+        data = json.load(file)
+    today = date.today()
+    now = datetime.datetime.now()
+    dt_string = now.strftime("%H%M")
+    print(dt_string)
+
+    user = str(ctx.message.author)
+
+    if user in data['dayvalues']['check-in']:
+        msg = "I already gave you credit for flum today baka:rage:! Try again tomorrow!"
+        await ctx.respond(msg, tts=True)
+        return
+
+    try:
+        channel = ctx.message.author.voice.channel
+    except AttributeError:
+        msg = "Can't Fool me :triumph: you aren't even in the voice chat :triumph:"
+        await ctx.respond(msg, tts=True)
+        return
+
+    if int(dt_string) <= 2200 and int(dt_string) >= 1900:
+        msg = "Thank you for your service kind stranger! Have some marcs to spend!"
+        await ctx.respond(msg, tts=True)
+        if data['dayvalues']['check-in'] == 'empty':
+            data['dayvalues']['check-in'] = str(user)
+        else:
+            data['dayvalues']['check-in'] = data['dayvalues']['check-in'] + ', ' + str(user)
+        mod = 500
+        x = user
+        try:
+            # adding marcs normally, do they have a wallet?
+            userdata[x]['score'] = userdata[x]['score'] + mod
+        except KeyError:
+            # no wallet found, do they have an entry?
+            try:
+                userdata[x]['score'] = mod
+            except KeyError:
+                userdata[x] = {}
+                userdata[x]['score'] = mod
+        msg = str(user[:-5]) + ' has ' + str(userdata[x]['score']) + ' marcs!'
+        await ctx.send(msg)
+        with open(altfilename, "w") as file:
+            json.dump(data, file)
+        with open(filename, "w") as file:
+            json.dump(userdata, file)
+    else:
+        bet = int(dt_string) - 1900
+        if bet > 0:
+            msg = "Too late! Try tommorow at 7:00 p.m. like everyone else"
+            await ctx.respond(msg, tts=True)
+        else:
+            msg = "Appreciate the enthusiam but, wait till everyone else is awake and flumcabale"
+            await ctx.send(msg, tts=True)
 
 @client.bridge_command(name='restart', description='kill flumbot only to make him stronger', pass_context=True)
 async def restart(ctx):
