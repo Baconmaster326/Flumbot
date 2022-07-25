@@ -386,7 +386,7 @@ async def flum(ctx, action: discord.Option(str), arg: discord.Option(str)):
         with open(quips, "w") as file:
             json.dump(line, file)
         msg = f"Succesfully added {arg} to flavortext list!"
-        await ctx.send(msg, ephemeral=True, delete_after=3)
+        await ctx.send(msg)
         return
 
     if 'awake' in action:
@@ -402,14 +402,14 @@ async def flum(ctx, action: discord.Option(str), arg: discord.Option(str)):
         with open(quips, "w") as file:
             json.dump(line, file)
         msg = f"Successfully added {arg} to the flumbot response list!"
-        await ctx.send(msg, ephemeral=True, delete_after=3)
+        await ctx.send(msg)
 
     if 'bet' in action:
         line['betmsg'].append(arg)
         with open(quips, "w") as file:
             json.dump(line, file)
         msg = f"Successfully added {arg} to the bet list!"
-        await ctx.send(msg, ephemeral=True, delete_after=3)
+        await ctx.send(msg)
         return
 
     if 'ad' in action:
@@ -417,7 +417,7 @@ async def flum(ctx, action: discord.Option(str), arg: discord.Option(str)):
         with open(quips, "w") as file:
             json.dump(line, file)
         msg = f"Successfully added <{arg}> to the list of ads"
-        await ctx.send(msg, ephemeral=True, delete_after=3)
+        await ctx.send(msg)
         return
 
     if 'purge' in action:
@@ -478,7 +478,7 @@ async def flum(ctx, action: discord.Option(str), arg: discord.Option(str)):
         with open(quips, "w") as file:
             json.dump(line, file)
         msg = f"Successfully added <{full_url}> to the flum stream"
-        await ctx.send(msg, ephemeral=True, delete_after=3)
+        await ctx.send(msg)
 
     if 'mp3' in action:
         link = arg
@@ -490,7 +490,7 @@ async def flum(ctx, action: discord.Option(str), arg: discord.Option(str)):
             print("dead")
             ctx.respond("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
             return
-        await ctx.respond(f"Adding <{link}> to the queue to download!", ephemeral=True, delete_after=3)
+        await ctx.respond(f"Adding <{link}> to the queue to download!")
         threading.Thread(target=entry, args=(link, ctx), daemon=True).start()
 
 async def download(link, ctx):

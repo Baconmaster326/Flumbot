@@ -55,7 +55,12 @@ async def parse(ctx):
                 try:
                     key = list(emoji.keys())
                     key = random.choice(key)
+                    with open("./bin/en_data/log.json", "r") as file:
+                        logmoji = json.load(file)
                     emoji = random.choice(emoji[key])['emoji']
+                    logmoji["history"].append(emoji)
+                    with open("./bin/en_data/log.json", "w") as file:
+                        json.dump(logmoji, file)
                     await ctx.add_reaction(emoji)
                     break
                 except:
