@@ -33,7 +33,7 @@ async def parse(ctx):
 
     positive = ["good", "amazing", "epic", "gamer", "funny"]            # good bot command key words
     negative = ["bad", "horrible", "awful", "annoying", "unfunny"]      # bad bot command key words
-    context = ["stream", "bot", "flumbot"]                              # awarding key words
+    context = ["bot"]                              # awarding key words
 
     if any(x in words for x in positive) and any(x in words for x in context):      # good bot check
         with open("./bin/en_data/longtermdata.json", "r") as file:

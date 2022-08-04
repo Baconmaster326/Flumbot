@@ -1,10 +1,13 @@
 import os
 import discord
+import requests
 import miditoaudio
 import random
 import asyncio
 import voiceplay
 import json
+import asyncpraw
+from asyncprawcore import NotFound
 from PIL import Image, ImageFont, ImageDraw
 
 winners = []
@@ -95,11 +98,11 @@ async def midimania(ctx, client):
     answer = select
     A, B, C, D = ' ', ' ', ' ', ' '
     samples = random.sample(os.listdir('./Music/MIDI/'), 4)
-    A, B, C, D = samples[0], samples[1], samples[2], samples[3]
+    A, B, C, D = str(samples[0])[:-4], str(samples[1])[:-4], str(samples[2])[:-4], str(samples[3])[:-4]
     while A == person or B == person or C == person or D == person:
         print("repetition detected")
         samples = random.sample(os.listdir('./Music/MIDI/'), 4)
-        A, B, C, D = samples[0], samples[1], samples[2], samples[3]
+        A, B, C, D = str(samples[0])[:-4], str(samples[1])[:-4], str(samples[2])[:-4], str(samples[3])[:-4]
 
     if select == 1:
         A = str(person)[:-4]
@@ -121,19 +124,19 @@ async def midimania(ctx, client):
     )
     embed2 = discord.Embed(
         title=f"A - {A}",
-        color=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
+        color=discord.Colour.blurple(),
     )
     embed3 = discord.Embed(
         title=f"B - {B}",
-        color=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
+        color=discord.Colour.greyple(),
     )
     embed4 = discord.Embed(
         title=f"C - {C}",
-        color=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
+        color=discord.Colour.green(),
     )
     embed5 = discord.Embed(
         title=f"D - {D}",
-        color=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
+        color=discord.Colour.red(),
     )
 
     msg1 = await ctx.send(embed=embed1)
@@ -152,6 +155,198 @@ async def midimania(ctx, client):
 
 
     await winnerlist(ctx, printable, 50)
+
+async def geddit(ctx, client):
+    global winners
+    global answer
+    global cheaters
+
+    winners.clear()
+    cheaters.clear()
+    answer = 0
+
+    reddit = asyncpraw.Reddit(client_id='kyPylZpqbbNzdg',
+                         client_secret='3xCZsd2Ib5GHwM_lkV8F5MzEUYI',
+                         username='FlumbotPRAW',
+                         password='somebodyring?',
+                         user_agent='flumbot')
+
+    id = []
+    subreddit = []
+    tempreddit = await reddit.subreddit("all")
+    async for submission in tempreddit.hot(limit=250):
+        id.append(submission.id)
+        subreddit.append(submission.subreddit.display_name)
+    post = await reddit.submission(id=random.choice(id))
+    person = post.subreddit.display_name
+    link = "https://reddit.com" + post.permalink
+    msg = "It's time for GEDDIT!\nYou'll have 30 seconds to determine what subreddit the following r/all post came " \
+          "from.\nPICK ONLY ONE TIME!!!"
+    msg = await ctx.respond(msg, tts=True)
+    await asyncio.sleep(12)
+    await msg.delete()
+
+    samples = random.sample(subreddit, 4)
+    select = random.randint(1, 4)
+    answer = select
+    A, B, C, D = samples[0], samples[1], samples[2], samples[3]
+    while A == person or B == person or C == person or D == person:
+        print("repetition detected")
+        samples = random.sample(subreddit, 4)
+        A, B, C, D = samples[0], samples[1], samples[2], samples[3]
+    if select == 1:
+        A = str(person)
+        printable = ':regional_indicator_a:'
+    if select == 2:
+        B = str(person)
+        printable = ':regional_indicator_b:'
+    if select == 3:
+        C = str(person)
+        printable = ':regional_indicator_c:'
+    if select == 4:
+        D = str(person)
+        printable = ':regional_indicator_d:'
+
+    embed1 = discord.Embed(
+        title=f"'{post.title}'",
+        description="What is the subreddit that this title came from?",
+        color=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
+    )
+    embed2 = discord.Embed(
+        title=f"A - {A}",
+        color=discord.Colour.blurple(),
+    )
+    embed3 = discord.Embed(
+        title=f"B - {B}",
+        color=discord.Colour.greyple(),
+    )
+    embed4 = discord.Embed(
+        title=f"C - {C}",
+        color=discord.Colour.green(),
+    )
+    embed5 = discord.Embed(
+        title=f"D - {D}",
+        color=discord.Colour.red(),
+    )
+
+    msg1 = await ctx.send(embed=embed1)
+    msg2 = await ctx.send(embed=embed2)
+    msg3 = await ctx.send(embed=embed3)
+    msg4 = await ctx.send(embed=embed4)
+    msg5 = await ctx.send(embed=embed5, view=answer_choices())
+
+    await asyncio.sleep(30)
+
+    await msg1.delete()
+    await msg2.delete()
+    await msg3.delete()
+    await msg4.delete()
+    await msg5.delete()
+
+    msg = f"The post was {link} from r/{post.subreddit}"
+    await ctx.send(msg, delete_after=15)
+
+    await winnerlist(ctx, printable, 50)
+
+async def gedditdx(ctx, client, args):
+    global winners
+    global answer
+    global cheaters
+
+    winners.clear()
+    cheaters.clear()
+    answer = 0
+    await ctx.respond("Launching GedditDX!", ephemeral=True, delete_after=float(1))
+    msg = await ctx.send("Please wait while I peruse your subreddit :D", tts=True)
+
+    reddit = asyncpraw.Reddit(client_id='kyPylZpqbbNzdg',
+                         client_secret='3xCZsd2Ib5GHwM_lkV8F5MzEUYI',
+                         username='FlumbotPRAW',
+                         password='somebodyring?',
+                         user_agent='flumbot')
+    id = []
+    pics = []
+    tempreddit = await reddit.subreddit(args)
+    sr = tempreddit.hot(limit=250)
+    try:
+        async for submission in sr:
+            if not submission.is_self:
+                if submission.url.endswith('.jpg') or submission.url.endswith('.png'):
+                    id.append(submission.id)
+                    pics.append(submission.url)
+    except Exception as e:
+        await msg.delete()
+        msg1 = await ctx.send("I'm having trouble with this subreddit, please make sure it exists, or isn't banned!")
+        await asyncio.sleep(15)
+        await msg1.delete()
+        return
+    if len(pics) < 4:
+        print('loser posted a text only subreddit, let him know the news')
+        await msg.delete()
+        msg = "Your subreddit doesn't appear to have enough pictures I can use, please use a different one."
+        msg1 = await ctx.send(msg)
+        await asyncio.sleep(13)
+        await msg1.delete()
+        return False
+    post = await reddit.submission(id=random.choice(id))
+    while len(post.title) > 256:
+        post = await reddit.submission(id=random.choice(id))
+    person = post.url
+    await msg.delete()
+    if args.lower() != "all":
+        msg = f"It's time to for GEDDITDX!\nYou'll have 30 seconds to determine what picture matches the title that came " \
+              f"from r/{post.subreddit.display_name}\nPICK ONLY ONE TIME!!!"
+    else:
+        msg = f"It's time to for GEDDITDX!\nYou'll have 30 seconds to determine what picture matches the title that came " \
+              f"from r/all\nPICK ONLY ONE TIME!!!"
+    msg1 = await ctx.respond(msg, tts=True)
+    await asyncio.sleep(12)
+    await msg1.delete()
+    embed = discord.Embed(title=post.title,
+                          colour=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255),
+                                                         random.randint(0, 255)))
+    samples = random.sample(pics, 4)
+    select = random.randint(1, 4)
+    answer = select
+    A, B, C, D = samples[0], samples[1], samples[2], samples[3]
+    while A == person or B == person or C == person or D == person:
+        print("repetition detected")
+        samples = random.sample(pics, 4)
+        A, B, C, D = samples[0], samples[1], samples[2], samples[3]
+    if select == 1:
+        A = str(person)
+        printable = ':regional_indicator_a:'
+    if select == 2:
+        B = str(person)
+        printable = ':regional_indicator_b:'
+    if select == 3:
+        C = str(person)
+        printable = ':regional_indicator_c:'
+    if select == 4:
+        D = str(person)
+        printable = ':regional_indicator_d:'
+    answers = [A, B, C, D]
+
+    embed = discord.Embed(
+        title=f"'{post.title}'",
+        description=f"What picture matches this title from r/{args}",
+        color=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
+    )
+
+    msg = await ctx.send(embed=embed)
+    await getpicture(answers)
+    message = await ctx.channel.send(file=discord.File('person.jpg'), view=answer_choices())
+
+    for file in os.listdir("./"):
+        if file.endswith(".jpg"):
+            os.remove(file)
+
+    await asyncio.sleep(30)
+    await msg.delete()
+    await message.delete()
+
+    await winnerlist(ctx, printable, 100)
+
 
 async def winnerlist(ctx, printable, mod):
     global winners
@@ -198,3 +393,71 @@ async def winnerlist(ctx, printable, mod):
     msg = "\n:clap::clap::clap::clap::clap::clap:\n"
     await ctx.send(msg, tts=True)
     os.remove('person.png')
+
+async def getpicture(links):
+    x = 0
+    for image in links:
+        print(image)
+        img_data = requests.get(image).content
+        with open('image'+str(x)+'.jpg', 'wb') as handler:
+            handler.write(img_data)
+        x += 1
+    im1 = Image.open('./image0.jpg')
+    im2 = Image.open('./image1.jpg')
+    im3 = Image.open('./image2.jpg')
+    im4 = Image.open('./image3.jpg')
+
+
+    def get_concat_h_multi_resize(im_list, resample=Image.BICUBIC):
+        min_height = min(im.height for im in im_list)
+        im_list_resize = [im.resize((int(im.width * min_height / im.height), min_height), resample=resample)
+                          for im in im_list]
+        total_width = sum(im.width for im in im_list_resize)
+        dst = Image.new('RGB', (total_width, min_height))
+        pos_x = 0
+        for im in im_list_resize:
+            dst.paste(im, (pos_x, 0))
+            pos_x += im.width
+        return dst
+
+    def get_concat_v_multi_resize(im_list, resample=Image.BICUBIC):
+        min_width = min(im.width for im in im_list)
+        im_list_resize = [im.resize((min_width, int(im.height * min_width / im.width)), resample=resample)
+                          for im in im_list]
+        total_height = sum(im.height for im in im_list_resize)
+        dst = Image.new('RGB', (min_width, total_height))
+        pos_y = 0
+        for im in im_list_resize:
+            dst.paste(im, (0, pos_y))
+            pos_y += im.height
+        return dst
+
+    def get_concat_tile_resize(im_list_2d, resample=Image.BICUBIC):
+        im_list_v = [get_concat_h_multi_resize(im_list_h, resample=resample) for im_list_h in im_list_2d]
+        return get_concat_v_multi_resize(im_list_v, resample=resample)
+
+    get_concat_tile_resize([[im1, im2],
+                            [im3, im4]]).save('./image4.jpg')
+
+    im = Image.open("./image4.jpg")
+    d = ImageDraw.Draw(im)
+    letters = ['A', 'B', 'C', 'D']
+    fontsize = int(.05*im.width)
+    fontwidth = int(im.width*.0075)
+    for letter in letters:
+        if letter == 'A':
+            text_color = 0xe74c3c
+            location = (int(im.width*.02), int(im.height*.02))
+        if letter == 'B':
+            text_color = 0x99aab5
+            location = (int(im.width*.92), int(im.height*.02))
+        if letter == 'C':
+            text_color = 0x2ecc71
+            location = (int(im.width*.02), int(im.height*.92))
+        if letter == 'D':
+            text_color = 0x5865F2
+            location = (int(im.width*.92), int(im.height*.92))
+        d.text(location, letter, font=ImageFont.truetype(font='./Pics/sponge.ttf', size=fontsize), fill=text_color,
+               stroke_width=fontwidth, stroke_fill="#000000")
+    im.save("person.jpg")
+    return True

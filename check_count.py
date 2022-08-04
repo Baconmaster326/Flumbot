@@ -50,8 +50,9 @@ async def parse(ctx):
 
             with open('./bin/en_data/emoji.json', "r", encoding="utf8") as file:
                 emoji = json.load(file)
-
+            tries = 0
             while True:
+                tries += 1
                 try:
                     key = list(emoji.keys())
                     key = random.choice(key)
@@ -64,7 +65,10 @@ async def parse(ctx):
                     await ctx.add_reaction(emoji)
                     break
                 except:
-                    continue
+                    if tries == 5:
+                        break
+                    else:
+                        continue
 
         else:       # wrong number handler
             await ctx.channel.send(f"{username[:-5]} ruined the count at {data['count'][serverid][1]}. They typed the wrong number!")

@@ -100,6 +100,16 @@ async def on_message(message):
 async def Midimania(ctx):
     await games.midimania(ctx, client)
 
+@client.bridge_command(name = "geddit", description= "Let's GEDDIT", pass_context= True)
+async def Geddit(ctx):
+    await games.geddit(ctx, client)
+
+@client.bridge_command(name = "gedditdx", description= "Let's GEDDITDX", pass_context= True)
+async def GedditDX(ctx, subreddit: discord.Option(str)):
+    if len(subreddit) == 0:
+        subreddit = 'all'
+    await games.gedditdx(ctx, client, subreddit)
+
 @client.bridge_command(name = "gamble", description= "House always wins", pass_context= True)
 async def gamble(ctx):
     mp3files = []
