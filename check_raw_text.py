@@ -1,5 +1,7 @@
 import json
 import random
+import time
+
 import discord
 import asyncio
 
@@ -19,6 +21,42 @@ async def make_ordinal(n):          # make number ordinal
     else:
         suffix = ['th', 'st', 'nd', 'rd', 'th'][min(n % 10, 4)]
     return str(n) + suffix
+
+async def fortune(ctx):
+    chance = int(random.randrange(0, 1000))
+    msg = "Let me think on what you have told me"
+    await ctx.respond(msg, tts=True)
+    await asyncio.sleep(4)
+    msg = ":thinking:"
+
+    if chance == 69:
+        msg = "give me a couple hours to contemplate the results"
+        await ctx.send(msg, tts=True)
+        time.sleep(10800)
+        guess = ['yes', 'no', 'poop', 'penile fracture']
+        msg = random.choice(guess)
+        await ctx.send(msg, tts=True)
+
+    else:
+        await ctx.send(msg, tts=True)
+        await asyncio.sleep(6)
+        wager = ['It would be wise to pursue other ventures', 'History does not side with you', 'no lol',
+                 'I recommend you dab', 'You do you', "Just don't steal a tree",
+                 "The future looks bright", "It is unlikely", "Pray on it", "Ask marc", "Ask rat", "Ask niche",
+                 "Ask yourself", "best @everyone with your question",
+                 "yes", "the future you seek has already happened", "marc said he will do it for you",
+                 "only t-dubs will know the answer to your question", "Ask again", "It is certain",
+                 "It is decidedly so", "Most likely", "Meh", "Signs point to yes", "Without a doubt", "Outlook good",
+                 "Outlook not so good", "You may rely on it", "Cannot predict now",
+                 "Just die", "I prescribe a midimania to heal", "Maybe think on it a few days",
+                 "Rome wasn't built in a day", "The day of reckoning is approaching", "help me",
+                 "Fo Sure", "Nah", "I don't feel like it", "behind you is the answer you seek", "yes", "no",
+                 "yeah I think so", "Doesn't sounds right", "I think you are wrong", "Is that gamer?", "oh yeah",
+                 "Think for yourself next time", "Uhhhhhhhhhhhhhhhhhhhhhhhh", "yuh", "nah", "What would Jesus Do?",
+                 "Ratbuddy said ... no", "Ratbuddy said ... yes"]
+        msg = random.choice(wager)
+        await ctx.send(msg, tts=True)
+
 
 async def parse(ctx):
     message = str(ctx.content)                  # message is the full string
@@ -94,6 +132,30 @@ async def parse(ctx):
         await ctx.channel.send(file=discord.File('./Pics/doyou.png'))
         await asyncio.sleep(5)
         await ctx.channel.send(file=discord.File('./Pics/hedo.png'))
+
+    if "8 ball" in message.lower():
+        msg = "Let me think on what you have told me"
+        await ctx.channel.send(msg, tts=True)
+        await asyncio.sleep(4)
+        msg = ":thinking:"
+        await ctx.channel.send(msg, tts=True)
+        await asyncio.sleep(6)
+        wager = ['It would be wise to pursue other ventures', 'History does not side with you', 'no lol',
+                 'I recommend you dab', 'You do you', "Just don't steal a tree",
+                 "The future looks bright", "It is unlikely", "Pray on it", "Ask marc", "Ask rat", "Ask niche",
+                 "Ask yourself", "best @everyone with your question",
+                 "yes", "the future you seek has already happened", "marc said he will do it for you",
+                 "only t-dubs will know the answer to your question", "Ask again", "It is certain",
+                 "It is decidedly so", "Most likely", "Meh", "Signs point to yes", "Without a doubt", "Outlook good",
+                 "Outlook not so good", "You may rely on it", "Cannot predict now",
+                 "Just die", "I prescribe a midimania to heal", "Maybe think on it a few days",
+                 "Rome wasn't built in a day", "The day of reckoning is approaching", "help me",
+                 "Fo Sure", "Nah", "I don't feel like it", "behind you is the answer you seek", "yes", "no",
+                 "yeah I think so", "Doesn't sounds right", "I think you are wrong", "Is that gamer?", "oh yeah",
+                 "Think for yourself next time", "Uhhhhhhhhhhhhhhhhhhhhhhhh", "yuh", "nah", "What would Jesus Do?",
+                 "Ratbuddy said ... no", "Ratbuddy said ... yes"]
+        msg = random.choice(wager)
+        await ctx.channel.send(msg, tts=True)
 
     if "ok marc" in message.lower() and len(words) == 2:                # ok marc
         msg = "ok marc"

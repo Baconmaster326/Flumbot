@@ -143,6 +143,10 @@ async def autopilot(ctx):
         timer = timer + random.randint(30, 100)
         print(f"waiting {timer} seconds before next clip :)")
 
+@client.bridge_command(name = "8-ball", description= "let flumbot make the decisions now", pass_context= True)
+async def ball(ctx):
+    await check_raw_text.fortune(ctx)
+
 @client.bridge_command(name = "off", description= "Turn off autopilot :(", pass_context= True)
 async def off(ctx):
     global pilot
