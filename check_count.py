@@ -54,6 +54,13 @@ async def parse(ctx):
             while True:
                 tries += 1
                 try:
+                    if username == "emrmann#0":
+                        goji = []
+                        if random.randint(0, 5) == 2:
+                            for each in range(9):
+                                goji.append(random.choice(emoji[random.choice(list(emoji.keys()))]))
+                            for each in goji:
+                                await ctx.add_reaction(each['emoji'])
                     key = list(emoji.keys())
                     key = random.choice(key)
                     emoji = random.choice(emoji[key])['emoji']
