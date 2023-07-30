@@ -16,6 +16,9 @@ import random
 import games
 import daystart
 import shutil
+import psutil
+import time
+from threading import Thread
 
 pilot = 0
 
@@ -23,7 +26,7 @@ client = bridge.Bot(command_prefix='', intents=discord.Intents.all(), case_insen
 
 with open('token.json', "r") as file:
     data = json.load(file)
-token = data['token']
+token = data['discord-token']
 
 @client.event
 async def on_ready():
@@ -406,6 +409,20 @@ async def restart(ctx):
     await ctx.respond("cry :(", ephemeral=True, delete_after=float(10))
     os.startfile('restart.py')
     exit()
+async def kill_server():
+    await asyncio.sleep(7200)
+    PROC_NAME = "bedrock_server.exe"
+
+    for proc in psutil.process_iter():
+        # check whether the process to kill name matches
+        if proc.name() == PROC_NAME:
+            proc.kill()
+    pass
+@client.bridge_command(name='minecraft', description='raise the electricity', pass_context=True)
+async def minecraft(ctx):
+    await ctx.respond("cummin right up", ephemeral=True, delete_after=float(10))
+    os.startfile('bedrock_server.exe.lnk')
+    asyncio.create_task(kill_server())
 
 @client.bridge_command(name='flip', description='flip a standard US coin', pass_context=True)
 async def flip(ctx, *args):
