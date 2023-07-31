@@ -26,7 +26,7 @@ client = bridge.Bot(command_prefix='', intents=discord.Intents.all(), case_insen
 
 with open('token.json', "r") as file:
     data = json.load(file)
-token = data['discord-token']
+token = data['token']
 
 @client.event
 async def on_ready():
