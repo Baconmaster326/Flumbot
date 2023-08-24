@@ -8,7 +8,9 @@ import os
 import requests
 from gpt4all import GPT4All
 
-session = None
+LLMsession = GPT4All(model_name='wizardLM-13B-Uncensored.ggmlv3.q4_0.bin') #
+LLMsession.config['systemPrompt'] = "### System:\nYou are acting as a chatbot named Flumbot. Please be a snarky bot, respond with occasional Generation Z humor, sarcasm, dated references. Try and be helpful if you can. If you don't know the answer make up an answer. Keep in mind you only have 2000 charcters to respond."
+
 
 async def make_ordinal(n):          # make number ordinal
     '''
@@ -112,17 +114,14 @@ async def parse(ctx):
 
 
     if "hey flumbot" in message.lower() and len(words) > 2:
-        global session
+        global LLMsession
 
-        if session == None:
-            model = GPT4All(model_name='GPT4All-13B-snoozy.ggmlv3.q4_0.bin')
-            session = model
-            session.config['systemPrompt'] = "### System:\nYou are acting as an unhelpful chatbot named Flumbot. Please be a snarky bot, respond with loads of Generation Z humor, sarcasm, and dated references. Keep your responses to a 5 sentence maximum."
-
-        with session.chat_session():
-            response1 = session.generate(prompt=str(message), temp=0.5)
-
-        await ctx.channel.send(response1)
+        try:
+            with LLMsession.chat_session():
+                response = LLMsession.generate(prompt=str(message), temp=0, max_tokens=500)
+        except:
+            response = "Me big doodoo head. I cannot process your response right now. Something timed-out."
+        await ctx.channel.send(response)
         return
 
 
