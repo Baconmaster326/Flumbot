@@ -4,9 +4,11 @@ import datetime
 import discord
 import requests
 import youtube_dl
+import logging
 from discord.ext import bridge
 from discord.ext.commands import CommandNotFound
 from datetime import date
+from logging.handlers import RotatingFileHandler
 import check_raw_text
 import check_count
 import voiceplay
@@ -30,6 +32,14 @@ token = data['token']
 
 @client.event
 async def on_ready():
+
+    logger = logging.getLogger()
+
+    logging.basicConfig(handlers=[logging.FileHandler('logs.log')], level=logging.DEBUG)
+    logger = logging.getLogger()
+    logger.debug("Logger Initialized")
+    logger.warning("Warning.")
+
     print('---------')
     print('Logged in as')
     print(client.user.name)
@@ -78,6 +88,8 @@ async def on_ready():
             link = await daystart.link2()
             await channel.send(file=discord.File(link))
             os.remove(link)
+     
+
 
 @client.event
 async def on_message(message):

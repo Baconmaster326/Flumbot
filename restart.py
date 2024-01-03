@@ -15,7 +15,6 @@ for each in psutil.pids():
     except:
         continue
 print(plist)
-
 if plist[0].create_time() < plist[1].create_time():
     plist[0].kill()
 else:
