@@ -8,7 +8,6 @@ import logging
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 from datetime import date
-from logging.handlers import RotatingFileHandler
 import check_raw_text
 import check_count
 import voiceplay
@@ -19,8 +18,6 @@ import games
 import daystart
 import shutil
 import psutil
-import time
-from threading import Thread
 
 pilot = 0
 
