@@ -5,10 +5,9 @@ import discord
 import requests
 import youtube_dl
 import logging
-from discord.ext import bridge
+from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 from datetime import date
-from logging.handlers import RotatingFileHandler
 import check_raw_text
 import check_count
 import voiceplay
@@ -19,12 +18,14 @@ import games
 import daystart
 import shutil
 import psutil
-import time
-from threading import Thread
 
 pilot = 0
 
-client = bridge.Bot(command_prefix='', intents=discord.Intents.all(), case_insensitive=True)
+client = commands.Bot(command_prefix='', intents=discord.Intents.all(), case_insensitive=True)
+
+logging.basicConfig(handlers=[logging.FileHandler('debug.log')], level=logging.DEBUG)
+logger = logging.getLogger()
+logger.debug("Logger Initialized")
 
 with open('token.json', "r") as file:
     data = json.load(file)
@@ -32,19 +33,13 @@ token = data['token']
 
 @client.event
 async def on_ready():
-
-    logger = logging.getLogger()
-
-    logging.basicConfig(handlers=[logging.FileHandler('logs.log')], level=logging.DEBUG)
-    logger = logging.getLogger()
-    logger.debug("Logger Initialized")
-    logger.warning("Warning.")
-
     print('---------')
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
     print('---------')
+    await client.tree.sync()
+    print("Synced commands list")
 
     altfilename = './bin/en_data/longtermdata.json'
 
@@ -111,21 +106,21 @@ async def on_message(message):
 
     await client.process_commands(message)
 
-@client.bridge_command(name = "midimania", description= "The hit new game hosted by yours truly", pass_context= True)
+@client.hybrid_command(name = "midimania", description= "The hit new game hosted by yours truly", pass_context= True)
 async def Midimania(ctx):
     await games.midimania(ctx, client)
 
-@client.bridge_command(name = "geddit", description= "Let's GEDDIT", pass_context= True)
+@client.hybrid_command(name = "geddit", description= "Let's GEDDIT", pass_context= True)
 async def Geddit(ctx):
     await games.geddit(ctx, client)
 
-@client.bridge_command(name = "gedditdx", description= "Let's GEDDITDX", pass_context= True)
-async def GedditDX(ctx, subreddit: discord.Option(str)):
+@client.hybrid_command(name = "gedditdx", description= "Let's GEDDITDX", pass_context= True)
+async def GedditDX(ctx, subreddit):
     if len(subreddit) == 0:
         subreddit = 'all'
     await games.gedditdx(ctx, client, subreddit)
 
-@client.bridge_command(name = "gamble", description= "House always wins", pass_context= True)
+@client.hybrid_command(name = "gamble", description= "House always wins", pass_context= True)
 async def gamble(ctx):
     mp3files = []
     for dirpath, subdirs, files in os.walk('./Clips'):
@@ -135,12 +130,12 @@ async def gamble(ctx):
     cliplocation = random.choice(mp3files)
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name = "autopilot", description= "Let flumbot gamble his life away", pass_context= True)
+@client.hybrid_command(name = "autopilot", description= "Let flumbot gamble his life away", pass_context= True)
 async def autopilot(ctx):
     global pilot
     pilot = 1
     timer = 0
-    await ctx.respond("Autopilot engaged, to turn off type 'off'", ephemeral=True, delete_after=3)
+    await ctx.send("Autopilot engaged, to turn off type 'off'", ephemeral=True, delete_after=3)
     mp3files = []
     for dirpath, subdirs, files in os.walk('./Clips'):
         for x in files:
@@ -158,11 +153,11 @@ async def autopilot(ctx):
         timer = timer + random.randint(30, 100)
         print(f"waiting {timer} seconds before next clip :)")
 
-@client.bridge_command(name = "8-ball", description= "let flumbot make the decisions now", pass_context= True)
+@client.hybrid_command(name = "8-ball", description= "let flumbot make the decisions now", pass_context= True)
 async def ball(ctx):
     await check_raw_text.fortune(ctx)
 
-@client.bridge_command(name = "off", description= "Turn off autopilot :(", pass_context= True)
+@client.hybrid_command(name = "off", description= "Turn off autopilot :(", pass_context= True)
 async def off(ctx):
     global pilot
     pilot = 0
@@ -171,191 +166,191 @@ async def off(ctx):
         await server.disconnect()
     except AttributeError:
         print("he wasn't in a voice channel")
-    await ctx.respond("I'm going to <@100562084894371840> on you", ephemeral=True, delete_after=3)
+    await ctx.send("I'm going to <@100562084894371840> on you", ephemeral=True, delete_after=3)
     print('autopilot off')
 
-@client.bridge_command(name = "football", description= "The new John Madden game sounds pretty good.", pass_context= True)
+@client.hybrid_command(name = "football", description= "The new John Madden game sounds pretty good.", pass_context= True)
 async def football(ctx):
-    await ctx.respond("HI EVERYONE AND WELCOME TO JOHN MADDEN FOOTBALL!!!", delete_after=float(10))
+    await ctx.send("HI EVERYONE AND WELCOME TO JOHN MADDEN FOOTBALL!!!", delete_after=float(10))
     await voiceplay.playclip('./Clips/Oneoff/Futbol.mp3', ctx, client, 0)
 
-@client.bridge_command(name='bruh', description='For the bruh moments in our lives', pass_context=True)
+@client.hybrid_command(name='bruh', description='For the bruh moments in our lives', pass_context=True)
 async def bruh(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     await voiceplay.playclip('./Clips/Oneoff/bruh.mp3', ctx, client, 0)
 
-@client.bridge_command(name='baba', description='Meaty Chairs and Baba Yetus', pass_context=True)
+@client.hybrid_command(name='baba', description='Meaty Chairs and Baba Yetus', pass_context=True)
 async def baba(ctx):
-    await ctx.respond("you got it boss", delete_after=float(10), ephemeral=True)
+    await ctx.send("you got it boss", delete_after=float(10), ephemeral=True)
     await voiceplay.playclip('./Clips/Oneoff/babayeet.mp3', ctx, client, 0)
 
-@client.bridge_command(name='thomas', description='Thomas coming through', pass_context=True)
+@client.hybrid_command(name='thomas', description='Thomas coming through', pass_context=True)
 async def thomas(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     await voiceplay.playclip('./Clips/Oneoff/thomas.mp3', ctx, client, 0)
 
-@client.bridge_command(name='fridge', description='Classico Flumico', pass_context=True)
+@client.hybrid_command(name='fridge', description='Classico Flumico', pass_context=True)
 async def fridge(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     await voiceplay.playclip('./Clips/Oneoff/oof.mp3', ctx, client, 0)
 
-@client.bridge_command(name='clap', description='clap', pass_context=True)
+@client.hybrid_command(name='clap', description='clap', pass_context=True)
 async def clap(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     await voiceplay.playclip('./Clips/Oneoff/clap.mp3', ctx, client, 0)
 
-@client.bridge_command(name='keyboard', description='I hear a keyboard round here', pass_context=True)
+@client.hybrid_command(name='keyboard', description='I hear a keyboard round here', pass_context=True)
 async def keyboard(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     await voiceplay.playclip('./Clips/Oneoff/keyboard.mp3', ctx, client, 0)
 
-@client.bridge_command(name='chum', description='Gnot for the weak of heart', pass_context=True)
+@client.hybrid_command(name='chum', description='Gnot for the weak of heart', pass_context=True)
 async def chum(ctx):
-    await ctx.respond(":tired_face: You've been gnomed! :tired_face:", delete_after=float(10), tts=True)
+    await ctx.send(":tired_face: You've been gnomed! :tired_face:", delete_after=float(10), tts=True)
     await voiceplay.playclip('./Clips/Oneoff/chum.mp3', ctx, client, 0)
 
-@client.bridge_command(name='knock', description='Who is it? MonkaS', pass_context=True)
+@client.hybrid_command(name='knock', description='Who is it? MonkaS', pass_context=True)
 async def knock(ctx):
-    await ctx.respond("monster", ephemeral=True, delete_after=float(10))
+    await ctx.send("monster", ephemeral=True, delete_after=float(10))
     await voiceplay.playclip('./Clips/Oneoff/knock.mp3', ctx, client, 0)
 
-@client.bridge_command(name='cocaine', description='I am Impotent Rage', pass_context=True)
+@client.hybrid_command(name='cocaine', description='I am Impotent Rage', pass_context=True)
 async def cocaine(ctx):
-    await ctx.respond("Okay Mr. Phillips", ephemeral=True, delete_after=float(10))
+    await ctx.send("Okay Mr. Phillips", ephemeral=True, delete_after=float(10))
     await voiceplay.playclip('./Clips/Oneoff/trevor.mp3', ctx, client, 0)
 
-@client.bridge_command(name='futbol', description='A modern spin on a classic clip', pass_context=True)
+@client.hybrid_command(name='futbol', description='A modern spin on a classic clip', pass_context=True)
 async def futbol(ctx):
-    await ctx.respond("HI EVERYONE AND WELCOME TO JOHN MADDEN FOOT!", delete_after=float(10))
+    await ctx.send("HI EVERYONE AND WELCOME TO JOHN MADDEN FOOT!", delete_after=float(10))
     await voiceplay.playclip('./Clips/Oneoff/Fut.mp3', ctx, client, 0)
 
-@client.bridge_command(name='spongebob', description='You gotta lick the Marble', pass_context=True)
+@client.hybrid_command(name='spongebob', description='You gotta lick the Marble', pass_context=True)
 async def spongebob(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/spongebob/')))
     cliplocation = './Clips/spongebob/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='funny', description='listen to what other people think is funny', pass_context=True)
+@client.hybrid_command(name='funny', description='listen to what other people think is funny', pass_context=True)
 async def usersub(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/usersub/')))
     cliplocation = './Clips/usersub/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='alexjones', description='Alex Jones screams about walruses', pass_context=True)
+@client.hybrid_command(name='alexjones', description='Alex Jones screams about walruses', pass_context=True)
 async def alexjones(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/alexjones/')))
     cliplocation = './Clips/alexjones/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='ramsay', description='Gordon Ramsay enlightens the chat', pass_context=True)
+@client.hybrid_command(name='ramsay', description='Gordon Ramsay enlightens the chat', pass_context=True)
 async def ramsay(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/ramsay/')))
     cliplocation = './Clips/ramsay/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='gleib', description='This is your Idiotest', pass_context=True)
+@client.hybrid_command(name='gleib', description='This is your Idiotest', pass_context=True)
 async def gleib(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/gleib/')))
     cliplocation = './Clips/gleib/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='bigsmoke', description='Big Smoke gets Philisophical', pass_context=True)
+@client.hybrid_command(name='bigsmoke', description='Big Smoke gets Philisophical', pass_context=True)
 async def bigsmoke(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/bigsmoke/')))
     cliplocation = './Clips/bigsmoke/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='prequel', description='wut', pass_context=True)
+@client.hybrid_command(name='prequel', description='wut', pass_context=True)
 async def prequel(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/prequel/')))
     cliplocation = './Clips/prequel/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='meme', description='The biggest collection of memes since gamble', pass_context=True)
+@client.hybrid_command(name='meme', description='The biggest collection of memes since gamble', pass_context=True)
 async def meme(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/meme/')))
     cliplocation = './Clips/meme/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='agent', description='Agent 14 tells you what to do', pass_context=True)
+@client.hybrid_command(name='agent', description='Agent 14 tells you what to do', pass_context=True)
 async def agent(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/agent14/')))
     cliplocation = './Clips/agent14/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='trevor', description='Trevor...Phillips...Industries...', pass_context=True)
+@client.hybrid_command(name='trevor', description='Trevor...Phillips...Industries...', pass_context=True)
 async def trevor(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/trevor/')))
     cliplocation = './Clips/trevor/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='lester', description='Because we do not hear Lester enough', pass_context=True)
+@client.hybrid_command(name='lester', description='Because we do not hear Lester enough', pass_context=True)
 async def lester(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/lester/')))
     cliplocation = './Clips/lester/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='joke', description='Biggest Laughs', pass_context=True)
+@client.hybrid_command(name='joke', description='Biggest Laughs', pass_context=True)
 async def joke(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/joke/')))
     cliplocation = './Clips/joke/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='iasip', description='Trashman comes to eat garbage', pass_context=True)
+@client.hybrid_command(name='iasip', description='Trashman comes to eat garbage', pass_context=True)
 async def IASIP(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/IASIP/')))
     cliplocation = './Clips/IASIP/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='trump', description='We gotta build the wall', pass_context=True)
+@client.hybrid_command(name='trump', description='We gotta build the wall', pass_context=True)
 async def trump(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/trump/')))
     cliplocation = './Clips/trump/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='gameof', description='Booby B to our rescue', pass_context=True)
+@client.hybrid_command(name='gameof', description='Booby B to our rescue', pass_context=True)
 async def gameof(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/got/')))
     cliplocation = './Clips/got/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='fact', description='Bonzi knows so much', pass_context=True)
+@client.hybrid_command(name='fact', description='Bonzi knows so much', pass_context=True)
 async def fact(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/facts/')))
     cliplocation = './Clips/facts/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='wwe', description='Hulk Hogan', pass_context=True)
+@client.hybrid_command(name='wwe', description='Hulk Hogan', pass_context=True)
 async def wwe(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/wwe/')))
     cliplocation = './Clips/wwe/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='sports', description='NICE ON!', pass_context=True)
+@client.hybrid_command(name='sports', description='NICE ON!', pass_context=True)
 async def sports(ctx):
-    await ctx.respond("you got it boss", ephemeral=True, delete_after=float(10))
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     person = str(random.choice(os.listdir('./Clips/sports/')))
     cliplocation = './Clips/sports/' + person
     await voiceplay.playclip(cliplocation, ctx, client, 0)
 
-@client.bridge_command(name='check-in', description='check in for daily marcs, only avaliable at 7:00 EDT/EST', pass_context=True)
+@client.hybrid_command(name='check-in', description='check in for daily marcs, only avaliable at 7:00 EDT/EST', pass_context=True)
 async def checkin(ctx):
     filename = './bin/en_data/userdata.json'
     with open(filename, "r") as file:
@@ -372,19 +367,19 @@ async def checkin(ctx):
 
     if user in data['dayvalues']['check-in']:
         msg = "I already gave you credit for flum today baka:rage:! Try again tomorrow!"
-        await ctx.respond(msg, tts=True)
+        await ctx.send(msg, tts=True)
         return
 
     try:
         channel = ctx.message.author.voice.channel
     except AttributeError:
         msg = "Can't Fool me :triumph: you aren't even in the voice chat :triumph:"
-        await ctx.respond(msg, tts=True)
+        await ctx.send(msg, tts=True)
         return
 
     if int(dt_string) <= 2200 and int(dt_string) >= 1900:
         msg = "Thank you for your service kind stranger! Have some marcs to spend!"
-        await ctx.respond(msg, tts=True)
+        await ctx.send(msg, tts=True)
         if data['dayvalues']['check-in'] == 'empty':
             data['dayvalues']['check-in'] = str(user)
         else:
@@ -411,14 +406,14 @@ async def checkin(ctx):
         bet = int(dt_string) - 1900
         if bet > 0:
             msg = "Too late! Try tommorow at 7:00 p.m. like everyone else"
-            await ctx.respond(msg, tts=True)
+            await ctx.send(msg, tts=True)
         else:
             msg = "Appreciate the enthusiam but, wait till everyone else is awake and flumcabale"
             await ctx.send(msg, tts=True)
 
-@client.bridge_command(name='restart', description='kill flumbot only to make him stronger', pass_context=True)
+@client.hybrid_command(name='restart', description='kill flumbot only to make him stronger', pass_context=True)
 async def restart(ctx):
-    await ctx.respond("cry :(", ephemeral=True, delete_after=float(10))
+    await ctx.send("cry :(", ephemeral=True, delete_after=float(10))
     os.startfile('restart.py')
     exit()
 async def kill_server():
@@ -430,14 +425,14 @@ async def kill_server():
         if proc.name() == PROC_NAME:
             proc.kill()
     pass
-@client.bridge_command(name='minecraft', description='raise the electricity', pass_context=True)
+@client.hybrid_command(name='minecraft', description='raise the electricity', pass_context=True)
 async def minecraft(ctx):
-    await ctx.respond("cummin right up", ephemeral=True, delete_after=float(10))
+    await ctx.send("cummin right up", ephemeral=True, delete_after=float(10))
     os.startfile('bedrock_server.exe.lnk')
     asyncio.create_task(kill_server())
 
-@client.bridge_command(name='flip', description='flip a standard US coin', pass_context=True)
-async def flip(ctx, *args):
+@client.hybrid_command(name='flip', description='flip a standard US coin', pass_context=True)
+async def flip(ctx, args):
         x = list(args)
         if 'coin' in x:
             if random.randint(0, 1) == 1:
@@ -450,8 +445,8 @@ async def flip(ctx, *args):
             msg = 'Coin is ' + result + ' side up.'
             await ctx.send(msg, tts=True)
 
-@client.bridge_command(name='roll', description='roll any dice flumbot has', pass_context=True)
-async def roll(ctx, sidedness: discord.Option(int), times: discord.Option(int), modifier: discord.Option(int)):
+@client.hybrid_command(name='roll', description='roll any dice flumbot has', pass_context=True)
+async def roll(ctx, sidedness, times, modifier):
     rolls = []
     sum = 0
     i = 0
@@ -466,10 +461,10 @@ async def roll(ctx, sidedness: discord.Option(int), times: discord.Option(int), 
         str = f"{str}Dice {i} rolled a {each}!\n"
     str = f"{str}\nd{sidedness}x{times}+{modifier} = {sum} + {modifier} = {sum+modifier}"
 
-    await ctx.respond(content=str, ephemeral=True, delete_after=float(30))
+    await ctx.send(content=str, ephemeral=True, delete_after=float(30))
 
-@client.bridge_command(name='flum', description='various flum editing commands, it is amazing!', pass_context=True)
-async def flum(ctx, action: discord.Option(str), arg: discord.Option(str)):
+@client.hybrid_command(name='flum', description='various flum editing commands, it is amazing!', pass_context=True)
+async def flum(ctx, action, arg):
     quips = './bin/en_data/quips.json'
     altfilename = './bin/en_data/longtermdata.json'
 
@@ -567,7 +562,7 @@ async def flum(ctx, action: discord.Option(str), arg: discord.Option(str)):
             print("real")
         else:
             print("dead")
-            ctx.respond("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
+            ctx.send("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
             return
 
         if "youtu.be" in full_url:
@@ -577,7 +572,7 @@ async def flum(ctx, action: discord.Option(str), arg: discord.Option(str)):
             link = full_url.split("/")
             full_url = "https://www.youtube.com/watch?v=" + link[4]
         if full_url in line['ytlinks']:
-            await ctx.respond("Already in the list boss...", ephemeral=True, delete_after=3)
+            await ctx.send("Already in the list boss...", ephemeral=True, delete_after=3)
             return
         line['ytlinks'].append(full_url)
         with open(quips, "w") as file:
@@ -593,9 +588,9 @@ async def flum(ctx, action: discord.Option(str), arg: discord.Option(str)):
             print("real")
         else:
             print("dead")
-            ctx.respond("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
+            ctx.send("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
             return
-        await ctx.respond(f"Adding <{link}> to the queue to download!")
+        await ctx.send(f"Adding <{link}> to the queue to download!")
         threading.Thread(target=entry, args=(link, ctx), daemon=True).start()
 
 async def download(link, ctx):
