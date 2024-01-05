@@ -29,7 +29,7 @@ logger.debug("Logger Initialized")
 
 with open('token.json', "r") as file:
     data = json.load(file)
-token = data['token']
+token = data['token'][0]
 
 @client.event
 async def on_ready():

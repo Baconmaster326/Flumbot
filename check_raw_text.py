@@ -1,16 +1,20 @@
 import json
 import random
 import time
-import openai
 import discord
 import asyncio
+import google.generativeai as palm
 import os
 import requests
 from gpt4all import GPT4All
 
-LLMsession = GPT4All(model_name='wizardLM-13B-Uncensored.ggmlv3.q4_0.bin') #
-LLMsession.config['systemPrompt'] = "### System:\nYou are acting as a chatbot named Flumbot. Please be a snarky bot, respond with occasional Generation Z humor, sarcasm, dated references. Try and be helpful if you can. If you don't know the answer make up an answer. Keep in mind you only have 2000 charcters to respond."
 
+with open('token.json', "r") as file:
+    data = json.load(file)
+gtoken = data['token'][1]
+
+palm.configure(api_key=gtoken)
+response = palm.chat(messages="You are a chatbot named Flumbot. Please be a snarky bot and respond with occasional Generation Z humor, sarcasm, and dated references. Try and be helpful if you can. If you don't know the answer make up an answer. Keep your answers short and brief.")
 
 async def make_ordinal(n):          # make number ordinal
     '''
@@ -114,14 +118,11 @@ async def parse(ctx):
 
 
     if "hey flumbot" in message.lower() and len(words) > 2:
-        global LLMsession
+        global response
 
-        try:
-            with LLMsession.chat_session():
-                response = LLMsession.generate(prompt=str(message), temp=0, max_tokens=500)
-        except:
-            response = "Me big doodoo head. I cannot process your response right now. Something timed-out."
-        await ctx.channel.send(response)
+        print(response.last) #debug please remove
+        response = response.reply(message=str(message))
+        await ctx.channel.send(response.last)
         return
 
 
