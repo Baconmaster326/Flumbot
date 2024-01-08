@@ -23,6 +23,8 @@ pilot = 0
 
 client = commands.Bot(command_prefix='', intents=discord.Intents.all(), case_insensitive=True)
 
+os.chdir('/root/Flumbot')
+
 logging.basicConfig(handlers=[logging.FileHandler('debug.log')], level=logging.DEBUG)
 logger = logging.getLogger()
 logger.debug("Logger Initialized")
@@ -92,7 +94,7 @@ async def on_message(message):
         return
 
     messagetobot = str(message.content)
-    user = str(message.author)[:-5]
+    user = str(message.author)
     channel = message.channel.name
     guild = message.channel.guild.name
     print(f"=========\n{user} said {messagetobot} in {channel} || {guild}\nchecking for commands...")
@@ -396,7 +398,7 @@ async def checkin(ctx):
             except KeyError:
                 userdata[x] = {}
                 userdata[x]['score'] = mod
-        msg = str(user[:-5]) + ' has ' + str(userdata[x]['score']) + ' marcs!'
+        msg = str(user) + ' has ' + str(userdata[x]['score']) + ' marcs!'
         await ctx.send(msg)
         with open(altfilename, "w") as file:
             json.dump(data, file)

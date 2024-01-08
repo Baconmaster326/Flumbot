@@ -8,6 +8,7 @@ import os
 import requests
 from gpt4all import GPT4All
 
+os.chdir('/root/Flumbot')
 
 with open('token.json', "r") as file:
     data = json.load(file)
