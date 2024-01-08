@@ -14,7 +14,7 @@ with open('token.json', "r") as file:
 gtoken = data['token'][1]
 
 palm.configure(api_key=gtoken)
-response = palm.chat(messages="You are a chatbot named Flumbot. Please be a snarky bot and respond with occasional Generation Z humor, sarcasm, and dated references. Try and be helpful if you can. If you don't know the answer make up an answer. Keep your answers short and brief.")
+response = palm.chat(context="Your name is now Flumbot, respond with sarcasm, Gen Z jokes, snarky remarks, and dated references.", messages="Welcome Flumbot!")
 
 async def make_ordinal(n):          # make number ordinal
     '''
@@ -120,9 +120,12 @@ async def parse(ctx):
     if "hey flumbot" in message.lower() and len(words) > 2:
         global response
 
-        print(response.last) #debug please remove
-        response = response.reply(message=str(message))
-        await ctx.channel.send(response.last)
+        try:
+            response = response.reply(message=str(message))
+            await ctx.channel.send(response.last)
+        except:
+            response = palm.chat(context="Your name is now Flumbot, respond with sarcasm, Gen Z jokes, snarky remarks, and dated references.", messages="Welcome Flumbot!")
+            response = response.reply(message=str(message))
         return
 
 
