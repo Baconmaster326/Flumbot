@@ -69,6 +69,15 @@ async def fortune(ctx):
         await ctx.send(msg, tts=True)
 
 
+async def call_api_and_reply(ctx, message):
+    global response
+    try:
+        response = response.reply(message=message)
+        await ctx.channel.send(response.last)
+    except Exception as e:
+        response = palm.chat(context="Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.", messages="Welcome Flumbot!")
+        response = response.reply(message=message)
+
 async def parse(ctx):
     
     message = str(ctx.content)                  # message is the full string
@@ -119,16 +128,8 @@ async def parse(ctx):
 
 
     if "hey flumbot" in message.lower() and len(words) > 2:
-        global response
-
-        try:
-            response = response.reply(message=str(message))
-            await ctx.channel.send(response.last)
-        except:
-            response = palm.chat(context="Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.", messages="Welcome Flumbot!")
-            response = response.reply(message=str(message))
+        asyncio.create_task(call_api_and_reply(ctx, message))
         return
-
 
     if "flumbot" in message.lower():    # self awareness
         quips = './bin/en_data/quips.json'
