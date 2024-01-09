@@ -71,12 +71,19 @@ async def fortune(ctx):
 
 async def call_api_and_reply(ctx, message):
     global response
+
+    print("in call and api reply\n")
+
     try:
+        print("sending reply\n")
         response = response.reply(message=message)
+        print(response)
         await ctx.channel.send(response.last)
+        print("done awaiting" + response.last)
     except Exception as e:
         response = palm.chat(context="Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.", messages="Welcome Flumbot!")
         response = response.reply(message=message)
+        print(e)
 
 async def parse(ctx):
     
