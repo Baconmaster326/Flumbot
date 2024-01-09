@@ -23,7 +23,10 @@ pilot = 0
 
 client = commands.Bot(command_prefix='', intents=discord.Intents.all(), case_insensitive=True)
 
-os.chdir('/root/Flumbot')
+try:
+    os.chdir('/root/Flumbot')
+except Exception as e:
+    print("You're in the testing environment")
 
 logging.basicConfig(handlers=[logging.FileHandler('debug.log')], level=logging.DEBUG)
 logger = logging.getLogger()

@@ -8,7 +8,10 @@ import os
 import requests
 from gpt4all import GPT4All
 
-os.chdir('/root/Flumbot')
+try:
+    os.chdir('/root/Flumbot')
+except Exception as e:
+    print("You're in the testing environment")
 
 with open('token.json', "r") as file:
     data = json.load(file)
@@ -16,7 +19,8 @@ gtoken = data['token'][1]
 
 genai.configure(api_key=gtoken)
 chat = genai.GenerativeModel('gemini-pro').start_chat(history=[])
-chat.send_message("Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.")
+chat.send_message("Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.",
+                  safety_settings={'HARM_CATEGORY_SEXUAL' : 'block_none', 'HARM_CATEGORY_DANGEROUS' : 'block_none', 'HARM_CATEGORY_HARASSMENT' : 'block_none', 'HARM_CATEGORY_HATE_SPEECH' : 'block_none', 'HARM_CATEGORY_SEXUALLY_EXPLICIT' : 'block_none', 'HARM_CATEGORY_DANGEROUS_CONTENT' : 'block_none'})
 
 async def make_ordinal(n):          # make number ordinal
     '''
@@ -78,7 +82,11 @@ async def call_api_and_reply(ctx, message):
         await ctx.channel.send(response.text)
     except Exception as e:
         chat = genai.GenerativeModel('gemini-pro').start_chat(history=[])
-        chat.send_message("Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.")
+        chat.send_message("Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.",
+            safety_settings={'HARM_CATEGORY_SEXUAL': 'block_none', 'HARM_CATEGORY_DANGEROUS': 'block_none',
+                             'HARM_CATEGORY_HARASSMENT': 'block_none', 'HARM_CATEGORY_HATE_SPEECH': 'block_none',
+                             'HARM_CATEGORY_SEXUALLY_EXPLICIT': 'block_none',
+                             'HARM_CATEGORY_DANGEROUS_CONTENT': 'block_none'})
         response = chat.send_message(message)
         await ctx.channel.send(response.text)
         print(e)
