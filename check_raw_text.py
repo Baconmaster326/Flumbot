@@ -3,7 +3,7 @@ import random
 import time
 import discord
 import asyncio
-import google.generativeai as palm
+import google.generativeai as genai
 import os
 import requests
 from gpt4all import GPT4All
@@ -14,8 +14,9 @@ with open('token.json', "r") as file:
     data = json.load(file)
 gtoken = data['token'][1]
 
-palm.configure(api_key=gtoken)
-response = palm.chat(context="Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.", messages="Welcome Flumbot!")
+genai.configure(api_key=gtoken)
+chat = genai.GenerativeModel('gemini-pro').start_chat(history=[])
+chat.send_message("Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.")
 
 async def make_ordinal(n):          # make number ordinal
     '''
@@ -70,20 +71,18 @@ async def fortune(ctx):
 
 
 async def call_api_and_reply(ctx, message):
-    global response
-
-    print("in call and api reply\n")
+    global chat
 
     try:
-        print("sending reply\n")
-        response = response.reply(message=message)
-        print(response)
-        await ctx.channel.send(response.last)
-        print("done awaiting" + response.last)
+        response = chat.send_message(message)
+        await ctx.channel.send(response.text)
     except Exception as e:
-        response = palm.chat(context="Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.", messages="Welcome Flumbot!")
-        response = response.reply(message=message)
+        chat = genai.GenerativeModel('gemini-pro').start_chat(history=[])
+        chat.send_message("Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.")
+        response = chat.send_message(message)
+        await ctx.channel.send(response.text)
         print(e)
+
 
 async def parse(ctx):
     
