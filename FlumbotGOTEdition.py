@@ -28,7 +28,7 @@ try:
     os.chdir('/root/Flumbot')
 except Exception as e:
     print("You're in the testing environment")
-    dev = 1
+    dev = 0
 
 logging.basicConfig(handlers=[logging.FileHandler('debug.log')], level=logging.DEBUG)
 logger = logging.getLogger()
@@ -87,18 +87,21 @@ async def on_ready():
         if random.randint(0, 10) > 3:
             link = await daystart.link()
             await channel.send(file=discord.File(link))
-            os.remove(link)
         else:
             link = await daystart.link2()
             await channel.send(file=discord.File(link))
-            os.remove(link)
+        await channel.send(await daystart.quip_image(link))
+        os.remove(link)
      
 
 
 @client.event
 async def on_message(message):
     if message.author == client.user:
-        return
+        if "hey flumbot" in message.content:
+            print("new awake rule to add")
+        else:
+            return
 
     if message.type.name == "reply" and message.reference.resolved.author == client.user:        #are we being @'d?
         message.content = "hey flumbot, " + message.content
@@ -505,8 +508,11 @@ async def flum(ctx, action, arg):
         line['startmsg'].append(arg)
         with open(quips, "w") as file:
             json.dump(line, file)
-        msg = f"Successfully added {arg} to the startup messages list!"
-        await ctx.send(msg)
+        if "hey flumbot" in arg:
+            await ctx.send("Successfully added your rule!")
+        else:
+            msg = f"Successfully added {arg} to the startup messages list!"
+            await ctx.send(msg)
         return
 
     if 'name' in action:

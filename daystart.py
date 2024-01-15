@@ -6,8 +6,10 @@ from datetime import date
 import discord
 import requests
 import string
+import google.generativeai as genai
 from bs4 import BeautifulSoup
 from PIL import Image
+
 
 def game():
     quips = './bin/en_data/quips.json'
@@ -203,4 +205,44 @@ async def link2():
                 continue
             image.close()
             return "SPOILER_daily.png"
+
+async def quip_image(link):
+    with open('token.json', "r") as file:
+        data = json.load(file)
+    gtoken = data['token'][1]
+
+    prompt = "Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, " \
+             "snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a " \
+             "discord chatbot. "
+
+    safety_settings = [
+        {
+            "category": "HARM_CATEGORY_HARASSMENT",
+            "threshold": "BLOCK_NONE"
+        },
+        {
+            "category": "HARM_CATEGORY_HATE_SPEECH",
+            "threshold": "BLOCK_NONE"
+        },
+        {
+            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            "threshold": "BLOCK_NONE"
+        },
+        {
+            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+            "threshold": "BLOCK_NONE"
+        }
+    ]
+
+    genai.configure(api_key=gtoken)
+    model = genai.GenerativeModel(model_name='gemini-pro-vision', safety_settings=safety_settings)
+
+    image = Image.open(link)
+
+    response = model.generate_content(image)
+
+    response = model.generate_content([f"{prompt}. Tell me, as flumbot, what is in this image?", image])
+    response.resolve()
+    return response.text
+
 
