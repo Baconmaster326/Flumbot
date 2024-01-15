@@ -606,6 +606,17 @@ async def flum(ctx, action, arg):
         await ctx.send(f"Adding <{link}> to the queue to download!")
         threading.Thread(target=entry, args=(link, ctx), daemon=True).start()
 
+@client.hybrid_command(name='surprise', description='flumbot how scandelous of you!', pass_context=True)
+async def surprise(ctx):
+    await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
+    if random.randint(0, 1) == 1:
+        link = await daystart.link()
+    else:
+        link = await daystart.link2()
+    await ctx.channel.send(file=discord.File(link))
+    await ctx.channel.send(await daystart.quip_image(link))
+    os.remove(link)
+
 async def download(link, ctx):
     ydl_opts = {
         'format': 'bestaudio/best',
