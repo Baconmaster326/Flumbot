@@ -20,6 +20,7 @@ import shutil
 import psutil
 
 pilot = 0
+dev = 0
 
 client = commands.Bot(command_prefix='', intents=discord.Intents.all(), case_insensitive=True)
 
@@ -27,6 +28,7 @@ try:
     os.chdir('/root/Flumbot')
 except Exception as e:
     print("You're in the testing environment")
+    dev = 1
 
 logging.basicConfig(handlers=[logging.FileHandler('debug.log')], level=logging.DEBUG)
 logger = logging.getLogger()
@@ -45,6 +47,8 @@ async def on_ready():
     print('---------')
     await client.tree.sync()
     print("Synced commands list")
+    if dev:
+        return
 
     altfilename = './bin/en_data/longtermdata.json'
 
