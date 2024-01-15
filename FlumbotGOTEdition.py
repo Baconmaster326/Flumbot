@@ -62,7 +62,7 @@ async def on_ready():
         return
 
     #  change profile picture
-    #await daystart.profile(client)
+    await daystart.profile(client)
 
     # for each channel we a part of
     for channel in data['dayvalues']['channels']:
@@ -70,13 +70,8 @@ async def on_ready():
         deltaday = daystart.days()
         # flum new year process
         if (deltaday % 365) == 0:
-            x = deltaday
-            while x != 0:
-                await asyncio.sleep(2)
-                msg = "HAPPY FLUM YEAR\nGIVE IT UP FOR " + str(deltaday / 365) + " YEAR(s) OF FLUMBOT!!!\n"
-                await channel.send(msg, tts=True)
-                print('wrong')
-                x -= 1
+            msg = "HAPPY FLUM YEAR\nGIVE IT UP FOR " + str(deltaday / 365) + " YEAR(s) OF FLUMBOT!!!\n"
+            await channel.send(msg, tts=True)
 
         # send random awake message
         msg = daystart.awake()

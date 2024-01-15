@@ -98,7 +98,7 @@ async def profile(client):
         }
         currentDir = os.getcwd()
         path = currentDir  # saving images to Images folder
-        url = 'https://www.thispersondoesnotexist.com/image'
+        url = 'https://www.thispersondoesnotexist.com/'
         attempts = 0
         while attempts < 5:  # retry 5 times
             try:
@@ -240,8 +240,11 @@ async def quip_image(link):
     image = Image.open(link)
 
     response = model.generate_content(image)
-
-    response = model.generate_content([f"{prompt}. Tell me, as flumbot, what is in this image?", image])
+    if str(response.prompt_feedback.block_reason) == "BlockReason.OTHER":
+        model = genai.GenerativeModel(model_name='gemini-pro', safety_settings=safety_settings)
+        response = model.generate_content(f"{prompt}. I just showed you something disgusting, tell me your thoughts on that.")
+    else:
+        response = model.generate_content([f"{prompt}. Tell me, as flumbot, what is in this image?", image])
     response.resolve()
     return response.text
 
