@@ -5,8 +5,31 @@ import discord
 import asyncio
 import google.generativeai as genai
 import os
-import requests
-from gpt4all import GPT4All
+
+
+safety_settings = [
+    {
+        "category": "HARM_CATEGORY_HARASSMENT",
+        "threshold": "BLOCK_NONE"
+    },
+    {
+        "category": "HARM_CATEGORY_HATE_SPEECH",
+        "threshold": "BLOCK_NONE"
+    },
+    {
+        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        "threshold": "BLOCK_NONE"
+    },
+    {
+        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+        "threshold": "BLOCK_NONE"
+    }
+]
+
+prompt = "Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, " \
+         "snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a " \
+         "discord chatbot. "
+
 
 try:
     os.chdir('/root/Flumbot')
@@ -18,9 +41,8 @@ with open('token.json', "r") as file:
 gtoken = data['token'][1]
 
 genai.configure(api_key=gtoken)
-chat = genai.GenerativeModel('gemini-pro').start_chat(history=[])
-chat.send_message("Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.",
-                  safety_settings={'HARM_CATEGORY_SEXUAL' : 'block_none', 'HARM_CATEGORY_DANGEROUS' : 'block_none', 'HARM_CATEGORY_HARASSMENT' : 'block_none', 'HARM_CATEGORY_HATE_SPEECH' : 'block_none', 'HARM_CATEGORY_SEXUALLY_EXPLICIT' : 'block_none', 'HARM_CATEGORY_DANGEROUS_CONTENT' : 'block_none'})
+chat = genai.GenerativeModel(model_name='gemini-pro', safety_settings=safety_settings).start_chat(history=[])
+chat.send_message(prompt)
 
 async def make_ordinal(n):          # make number ordinal
     '''
@@ -76,17 +98,16 @@ async def fortune(ctx):
 
 async def call_api_and_reply(ctx, message):
     global chat
+    global prompt
+    global safety_settings
 
     try:
         response = chat.send_message(message)
         await ctx.channel.send(response.text)
     except Exception as e:
-        chat = genai.GenerativeModel('gemini-pro').start_chat(history=[])
-        chat.send_message("Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, snarky remarks, and dated references. Please keep your replies somewhat short as they are targeted for a discord chatbot.",
-            safety_settings={'HARM_CATEGORY_SEXUAL': 'block_none', 'HARM_CATEGORY_DANGEROUS': 'block_none',
-                             'HARM_CATEGORY_HARASSMENT': 'block_none', 'HARM_CATEGORY_HATE_SPEECH': 'block_none',
-                             'HARM_CATEGORY_SEXUALLY_EXPLICIT': 'block_none',
-                             'HARM_CATEGORY_DANGEROUS_CONTENT': 'block_none'})
+        await ctx.channel.send("me big doo doo head, you raised an " + str(e))
+        chat = genai.GenerativeModel(model_name='gemini-pro', safety_settings=safety_settings).start_chat(history=[])
+        chat.send_message(prompt)
         response = chat.send_message(message)
         await ctx.channel.send(response.text)
         print(e)

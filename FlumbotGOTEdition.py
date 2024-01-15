@@ -100,7 +100,7 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.type.name == "reply" and message.reference.resolved.author == client.user:
+    if message.type.name == "reply" and message.reference.resolved.author == client.user:        #are we being @'d?
         message.content = "hey flumbot, " + message.content
 
     messagetobot = str(message.content)
