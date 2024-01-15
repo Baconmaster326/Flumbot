@@ -54,7 +54,7 @@ async def parse(ctx):
             while True:
                 tries += 1
                 try:
-                    if username == "emrmann#0":
+                    if username == "emrmann":
                         goji = []
                         if random.randint(0, 5) == 2:
                             for each in range(9):

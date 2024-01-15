@@ -28,7 +28,7 @@ try:
     os.chdir('/root/Flumbot')
 except Exception as e:
     print("You're in the testing environment")
-    dev = 0
+    dev = 1
 
 logging.basicConfig(handlers=[logging.FileHandler('debug.log')], level=logging.DEBUG)
 logger = logging.getLogger()
