@@ -18,6 +18,7 @@ import games
 import daystart
 import shutil
 import psutil
+import yt_dlp
 
 pilot = 0
 dev = 0
@@ -549,7 +550,7 @@ async def flum(ctx, action, arg):
                 }],
             }
             try:
-                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     ydl.download([each])
             except:
                 await ctx.send("Purged video..." + str(each))
