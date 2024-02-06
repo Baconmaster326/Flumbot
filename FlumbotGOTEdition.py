@@ -536,6 +536,7 @@ async def flum(ctx, action, arg):
 
     if 'purge' in action:
         newlist = []
+        await ctx.send("Starting purge...")
         for each in line['ytlinks']:
             if ('user' in each) or ('twitch' in each) or ('youtu.be' in each):
                 await ctx.send("Purged video... " + str(each))
