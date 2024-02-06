@@ -591,14 +591,19 @@ async def flum(ctx, action, arg):
 
     if 'mp3' in action:
         link = arg
-        request = requests.get(link)
 
-        if not ("Video unavailable" in request.text or "Private video" in request.text):
-            print("real")
-        else:
-            print("dead")
-            ctx.send("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
+        ydl_opts = {
+            'cookiefile': 'cookies.txt'
+        }
+
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(link, download=False)
+        except Exception as e:
+            print(e)
+            await ctx.send("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
             return
+
         await ctx.send(f"Adding <{link}> to the queue to download!")
         threading.Thread(target=entry, args=(link, ctx), daemon=True).start()
 
