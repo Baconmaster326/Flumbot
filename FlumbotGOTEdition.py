@@ -551,7 +551,7 @@ async def flum(ctx, action, arg):
             }
             try:
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    ydl.download([each])
+                    info = ydl.extract_info([each], download=False)
             except:
                 await ctx.send("Purged video..." + str(each))
                 continue
