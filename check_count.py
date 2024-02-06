@@ -1,4 +1,6 @@
+import asyncio
 import json
+import os
 import random
 
 async def parse(ctx):
@@ -10,6 +12,10 @@ async def parse(ctx):
     serverid = str(ctx.guild.name)
     username = str(ctx.author)
     print(f"{username} is attempting to continue the count, with the number {number} in server {serverid}")
+
+    while os.path.exists("./write.lock"):
+        await asyncio.sleep(1)
+        print("waiting for other server to finish with the file...")
 
     altfilename = './bin/en_data/longtermdata.json'
     with open(altfilename, "r") as file:
@@ -107,7 +113,12 @@ async def parse(ctx):
         data["count"][serverid][1] = 0
         await ctx.add_reaction('💦')
 
+    file = open('write.lock', 'w')
+    file.close()
+
     with open(filename, "w") as file:
         json.dump(userdata, file)
     with open(altfilename, "w") as file:
         json.dump(data, file)
+
+    os.remove("write.lock")
