@@ -541,24 +541,15 @@ async def flum(ctx, action, arg):
                 await ctx.send("Purged video... " + str(each))
                 continue
             ydl_opts = {
-                'format': 'bestaudio/best',
-                'cookiefile': 'cookies.txt',
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '12',
-                }],
+                'cookiefile': 'cookies.txt'
             }
             try:
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    info = ydl.extract_info([each], download=False)
-            except:
+                    info = ydl.extract_info(each, download=False)
+            except Exception as e:
+                print(e)
                 await ctx.send("Purged video..." + str(each))
                 continue
-            for file in os.listdir('./'):
-                if file.endswith(".mp3"):
-                    location = os.path.join("./", file)
-                    os.remove(location)
             newlist.append(each)
         line['ytlinks'] = newlist
         with open(quips, "w") as file:
@@ -570,14 +561,9 @@ async def flum(ctx, action, arg):
 
     if 'video' in action:
         full_url = arg
-
-        request = requests.get(full_url)
-        if not ("Video unavailable" in request.text or "Private video" in request.text):
-            print("real")
-        else:
-            print("dead")
-            ctx.send("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
-            return
+        ydl_opts = {
+            'cookiefile': 'cookies.txt'
+        }
 
         if "youtu.be" in full_url:
             link = full_url.split("/")
@@ -588,6 +574,15 @@ async def flum(ctx, action, arg):
         if full_url in line['ytlinks']:
             await ctx.send("Already in the list boss...", ephemeral=True, delete_after=3)
             return
+
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(full_url, download=False)
+        except Exception as e:
+            print(e)
+            await ctx.send("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
+            return
+
         line['ytlinks'].append(full_url)
         with open(quips, "w") as file:
             json.dump(line, file)
