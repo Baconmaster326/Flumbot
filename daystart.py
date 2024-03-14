@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import random
@@ -150,6 +151,41 @@ async def link():
         print(request.url)
         file.write(request.content)
         file.close()
+
+    return "SPOILER_daily.png"
+
+
+async def link2():
+    # Choose a random board
+    boards = ['a', 'c', 'w', 'm', 'cgl', 'cm', 'n', 'jp', 'vp', 'v', 'vg', 'vr', 'co', 'g', 'tv', 'k', 'o', 'an', 'tg',
+              'sp', 'asp', 'sci', 'int', 'out', 'toy', 'biz', 'i', 'po', 'p', 'ck', 'ic', 'wg', 'mu', 'fa', '3', 'gd',
+              'diy', 'wsg', 's', 'hc', 'hm', 'h', 'e', 'u', 'd', 'y', 't', 'hr', 'gif', 'trv', 'fit', 'x', 'lit', 'adv',
+              'lgbt', 'mlp', 'b', 'r', 'r9k', 'pol', 'soc', 's4s']
+    board = random.choice(boards)
+
+    # Fetch the board's front page
+    url = f'https://boards.4chan.org/{board}/'
+    response = requests.get(url)
+
+    # Parse the HTML
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Extract all image links
+    image_links = []
+    for thread in soup.find_all('a', class_='fileThumb'):
+        if len(image_links) > 10:
+            break
+        image_links.append("https://" + thread['href'][2:])
+        await asyncio.sleep(1.5)
+
+    # Choose a random image link
+    image_link = random.choice(image_links)
+
+    response = requests.get(image_link)
+
+    with open("SPOILER_daily.png", 'wb') as f:
+        f.write(response.content)
+        f.close()
 
     return "SPOILER_daily.png"
 

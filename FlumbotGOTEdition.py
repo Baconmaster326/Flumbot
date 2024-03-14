@@ -79,8 +79,13 @@ async def on_ready():
         await channel.send(msg)
         msg = f"Give it up for Day {deltaday}! Day {deltaday}!"
         await channel.send(msg)
-        #send random reddit link
-        link = await daystart.link()
+        #send random reddit or 4chin link
+        if (random.randint(0, 10) > 8):
+            #send reddit link
+            link = await daystart.link()
+        else:
+            #send 4chin
+            link = await daystart.link2()
         await channel.send(file=discord.File(link))
         await channel.send(await daystart.quip_image(link))
         os.remove(link)
