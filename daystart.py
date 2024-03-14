@@ -176,6 +176,7 @@ async def link2():
 
             request = requests.get(src_img_from_html)
             if request.status_code != 200:
+                print(request.url)
                 print("broken link")
                 continue
 
