@@ -79,13 +79,9 @@ async def on_ready():
         await channel.send(msg)
         msg = f"Give it up for Day {deltaday}! Day {deltaday}!"
         await channel.send(msg)
-        # send which type of link, imgur or lightshot?
-        if random.randint(0, 10) > 5:
-            link = await daystart.link()
-            await channel.send(file=discord.File(link))
-        else:
-            link = await daystart.link2()
-            await channel.send(file=discord.File(link))
+        #send random reddit link
+        link = await daystart.link()
+        await channel.send(file=discord.File(link))
         await channel.send(await daystart.quip_image(link))
         os.remove(link)
      

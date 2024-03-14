@@ -154,53 +154,6 @@ async def link():
     return "SPOILER_daily.png"
 
 
-async def link2():
-    possible = string.ascii_lowercase + string.digits
-    possible = list(possible)
-    possible.remove('0')
-    while True:
-        link = []
-        for each in range(0, 6):
-            link.append(random.choice(possible))
-        link = ''.join(link)
-        link = "https://prnt.sc/" + link
-        user_agent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
-        request = requests.get(link, headers={"User-Agent": user_agent}, allow_redirects=False)
-        soup = BeautifulSoup(request.content, "html.parser")
-        images = soup.find_all("img", {"class": "no-click screenshot-image"})
-        for tag in images:
-            src_img_from_html = tag["src"]
-
-            if not src_img_from_html.startswith("http"):
-                continue
-
-            request = requests.get(src_img_from_html)
-            if request.status_code != 200:
-                print(request.url)
-                print("broken link")
-                continue
-
-            with open("SPOILER_daily.png", "wb") as file:
-                file.write(request.content)
-                file.close()
-
-            f_name = "./SPOILER_daily.png"
-            try:
-                image = Image.open(f_name)
-            except Exception as e:
-                print(e)
-                os.remove(f_name)
-                continue
-            width, height = image.size
-            if width < 200 or height < 200:
-                print("too small")
-                image.close()
-                os.remove(f_name)
-                continue
-            image.close()
-            return "SPOILER_daily.png"
-
-
 async def quip_image(link):
     with open('token.json', "r") as file:
         data = json.load(file)
