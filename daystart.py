@@ -178,14 +178,22 @@ async def link2():
         image_links.append("https://" + thread['href'][2:])
         await asyncio.sleep(1.5)
 
-    # Choose a random image link
-    image_link = random.choice(image_links)
+    while True:
+        # Choose a random image link
+        image_link = random.choice(image_links)
 
-    response = requests.get(image_link)
+        response = requests.get(image_link)
 
-    with open("SPOILER_daily.png", 'wb') as f:
-        f.write(response.content)
-        f.close()
+        with open("SPOILER_daily.png", 'wb') as f:
+            f.write(response.content)
+            f.close()
+
+        try:
+            Image.open("SPOILER_daily.png")
+            break
+        except Exception as e:
+            print(e)
+            continue
 
     return "SPOILER_daily.png"
 
@@ -223,12 +231,14 @@ async def quip_image(link):
 
     image = Image.open(link)
 
-    response = model.generate_content(image)
-    if str(response.prompt_feedback.block_reason) == "BlockReason.OTHER":
+    try:
+        response = model.generate_content(image)
+        response = model.generate_content([f"{prompt}. Tell me, as flumbot, what is in this image?", image])
+    except Exception as e:
+        print(e)
         model = genai.GenerativeModel(model_name='gemini-pro', safety_settings=safety_settings)
         response = model.generate_content(
-            f"{prompt}. I just showed you something disgusting, tell me your thoughts on that.")
-    else:
-        response = model.generate_content([f"{prompt}. Tell me, as flumbot, what is in this image?", image])
+            f"{prompt}. I just showed you something disgusting, tell me your thoughts on that. You experience intense "
+            f"pain looking at the image.")
     response.resolve()
     return response.text

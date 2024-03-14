@@ -80,7 +80,7 @@ async def on_ready():
         msg = f"Give it up for Day {deltaday}! Day {deltaday}!"
         await channel.send(msg)
         #send random reddit or 4chin link
-        if (random.randint(0, 10) > 8):
+        if random.randint(0, 10) > 8:
             #send reddit link
             link = await daystart.link()
         else:
