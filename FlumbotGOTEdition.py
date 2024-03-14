@@ -80,7 +80,7 @@ async def on_ready():
         msg = f"Give it up for Day {deltaday}! Day {deltaday}!"
         await channel.send(msg)
         # send which type of link, imgur or lightshot?
-        if random.randint(0, 10) > 3:
+        if random.randint(0, 10) > 5:
             link = await daystart.link()
             await channel.send(file=discord.File(link))
         else:
@@ -612,7 +612,7 @@ async def flum(ctx, action, arg):
 async def surprise(ctx):
     await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
     if random.randint(0, 1) == 1:
-        link = await daystart.link()
+        link = await daystart.link2()
     else:
         link = await daystart.link2()
     await ctx.channel.send(file=discord.File(link))

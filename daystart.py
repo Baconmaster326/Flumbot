@@ -6,6 +6,7 @@ from datetime import date
 import discord
 import requests
 import string
+import asyncpraw
 import google.generativeai as genai
 from bs4 import BeautifulSoup
 from PIL import Image
@@ -34,16 +35,19 @@ def awake():
     awake = str(random.choice(line['startmsg']))
     return awake
 
+
 def days():
     today = date.today()
     start = today - date(2019, 2, 26)
     return int(start.days)
+
 
 async def activity():
     quips = './bin/en_data/quips.json'
     with open(quips, "r") as file:
         line = json.load(file)
         return discord.Streaming(name=game(), url=str(random.choice(line['ytlinks'])))
+
 
 def datecheck():
     today = date.today()
@@ -85,6 +89,7 @@ def datecheck():
             json.dump(data, file)
         return 1
 
+
 async def profile(client):
     if random.randint(1, 100) > 10:
         selector = random.randint(0, 1)
@@ -114,61 +119,48 @@ async def profile(client):
                 print(e)
         image = Image.open('image.jpg')
         width, height = image.size
-        image = image.crop(((width/4), ((height/4)+50), (3*width/4), ((3*height/4)+100)))
+        image = image.crop(((width / 4), ((height / 4) + 50), (3 * width / 4), ((3 * height / 4) + 100)))
         image.save('image.jpg')
         with open('image.jpg', 'rb') as f:
             await client.user.edit(avatar=f.read())
         os.remove('image.jpg')
 
-async def link():
-    fails = 1
-    imgur_url = "https://i.imgur.com/"
-    selection = string.ascii_letters + string.digits
-    leng = random.choices(population=[5, 6, 7], weights=[.8, .15, .05])
-    leng = leng[0]
-    ext = [".png", ".jpg"]
-    ext = random.choice(ext)
-    while fails == 1:
-        r1, r2, r3, r4, r5, r6, r7 = random.sample(selection, 7)
-        if leng == 7:
-            print("Trying Length 7 links")
-            code = r1 + r2 + r3 + r4 + r5 + r6 + r7
-        elif leng == 6:
-            print("Trying Length 6 links")
-            code = r1 + r2 + r3 + r4 + r5 + r6
-        else:
-            print("Trying Length 5 links")
-            code = r1 + r2 + r3 + r4 + r5
-        file_name = code
-        full_url = imgur_url + file_name + ext
 
-        # does imgur link exist?
-        request = requests.get(full_url)
-        if request.status_code == 200:
-            f_name = 'SPOILER_daily' + ext
-            with open(f_name, 'wb') as f:
-                f.write(request.content)
-            try:
-                image = Image.open(f_name)
-            except:
-                os.remove(f_name)
-                continue
-            width, height = image.size
-            if width < 200 or height < 200:
-                print("too small")
-                image.close()
-                os.remove(f_name)
-                continue
-            image.close()
-            return f_name
+async def link():
+    # Create a Reddit instance
+    reddit = asyncpraw.Reddit(client_id='kyPylZpqbbNzdg',
+                              client_secret='3xCZsd2Ib5GHwM_lkV8F5MzEUYI',
+                              username='FlumbotPRAW',
+                              password='somebodyring?',
+                              user_agent='flumbot')
+    pics = []
+    tempreddit = await reddit.subreddit("all")
+    sr = tempreddit.hot(limit=250)
+    try:
+        async for submission in sr:
+            if not submission.is_self:
+                if submission.url.endswith('.jpg') or submission.url.endswith('.png'):
+                    pics.append(submission.url)
+    except Exception as e:
+        print(e)
+        print("can't find picture in all :(")
+
+    request = requests.get(random.choice(pics))
+    with open("SPOILER_daily.png", "wb") as file:
+        print(request.url)
+        file.write(request.content)
+        file.close()
+
+    return "SPOILER_daily.png"
+
 
 async def link2():
     possible = string.ascii_lowercase + string.digits
     possible = list(possible)
     possible.remove('0')
-    while (1):
+    while True:
         link = []
-        for each in range(0,6):
+        for each in range(0, 6):
             link.append(random.choice(possible))
         link = ''.join(link)
         link = "https://prnt.sc/" + link
@@ -182,19 +174,20 @@ async def link2():
             if not src_img_from_html.startswith("http"):
                 continue
 
-            img = requests.get(src_img_from_html)
-
-            if img.status_code == 520:
+            request = requests.get(src_img_from_html)
+            if request.status_code != 200:
+                print("broken link")
                 continue
 
             with open("SPOILER_daily.png", "wb") as file:
-                file.write(img.content)
+                file.write(request.content)
                 file.close()
 
             f_name = "./SPOILER_daily.png"
             try:
                 image = Image.open(f_name)
-            except:
+            except Exception as e:
+                print(e)
                 os.remove(f_name)
                 continue
             width, height = image.size
@@ -205,6 +198,7 @@ async def link2():
                 continue
             image.close()
             return "SPOILER_daily.png"
+
 
 async def quip_image(link):
     with open('token.json', "r") as file:
@@ -242,10 +236,9 @@ async def quip_image(link):
     response = model.generate_content(image)
     if str(response.prompt_feedback.block_reason) == "BlockReason.OTHER":
         model = genai.GenerativeModel(model_name='gemini-pro', safety_settings=safety_settings)
-        response = model.generate_content(f"{prompt}. I just showed you something disgusting, tell me your thoughts on that.")
+        response = model.generate_content(
+            f"{prompt}. I just showed you something disgusting, tell me your thoughts on that.")
     else:
         response = model.generate_content([f"{prompt}. Tell me, as flumbot, what is in this image?", image])
     response.resolve()
     return response.text
-
-
