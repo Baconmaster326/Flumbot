@@ -234,6 +234,8 @@ async def quip_image(link):
     try:
         response = model.generate_content(image)
         response = model.generate_content([f"{prompt}. Tell me, as flumbot, what is in this image?", image])
+        if "Traceback" in response.text or len(response.candidates) == 0:
+            raise Exception
     except Exception as e:
         print(e)
         model = genai.GenerativeModel(model_name='gemini-pro', safety_settings=safety_settings)
