@@ -227,7 +227,7 @@ async def quip_image(link):
     ]
 
     genai.configure(api_key=gtoken)
-    model = genai.GenerativeModel(model_name='gemini-pro-vision', safety_settings=safety_settings)
+    model = genai.GenerativeModel(model_name='gemini-1.5-flash', safety_settings=safety_settings)
 
     image = Image.open(link)
 
