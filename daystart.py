@@ -128,12 +128,13 @@ async def profile(client):
 
 
 async def link():
+    with open('token.json', "r") as file:
+        data = json.load(file)
+    rtoken = data['token'][2]
     # Create a Reddit instance
-    reddit = asyncpraw.Reddit(client_id='kyPylZpqbbNzdg',
-                              client_secret='3xCZsd2Ib5GHwM_lkV8F5MzEUYI',
-                              username='FlumbotPRAW',
-                              password='somebodyring?',
-                              user_agent='flumbot')
+    reddit = asyncpraw.Reddit(client_id='zQodI26PnfVmAhgdZogiLA',
+                              client_secret=rtoken,
+                              user_agent='FlumbotAPRAW')
     pics = []
     tempreddit = await reddit.subreddit("all")
     sr = tempreddit.hot(limit=250)
@@ -156,6 +157,7 @@ async def link():
 
 
 async def link2():
+    await asyncio.sleep(65)
     # Choose a random board
     boards = ['a', 'c', 'w', 'm', 'cgl', 'cm', 'n', 'jp', 'vp', 'v', 'vg', 'vr', 'co', 'g', 'tv', 'k', 'o', 'an', 'tg',
               'sp', 'asp', 'sci', 'int', 'out', 'toy', 'biz', 'i', 'po', 'p', 'ck', 'ic', 'wg', 'mu', 'fa', '3', 'gd',
@@ -203,9 +205,9 @@ async def quip_image(link):
         data = json.load(file)
     gtoken = data['token'][1]
 
-    prompt = "Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, " \
-             "snarky remarks, and dated references. Please keep your replies somewhat short (under 200 characters) as " \
-             "they are targeted for a discord chatbot."
+    prompt = "Your name is Flumbot. When constructing your replies infuse it with Gen Z jokes, " \
+             "and dated references. Use plenty of emojis Please keep your replies somewhat short (under 200 " \
+             "characters) as they are targeted for a discord chatbot. "
 
     safety_settings = [
         {
@@ -233,7 +235,8 @@ async def quip_image(link):
 
     try:
         response = model.generate_content(image)
-        response = model.generate_content([f"{prompt}. Tell me, as flumbot, what is in this image?", image])
+        response = model.generate_content([f"{prompt}. Tell me, as flumbot, what is in this image and what are your "
+                                           f"thoughts on it?", image])
         if "Traceback" in response.text or len(response.candidates) == 0:
             raise Exception
     except Exception as e:
