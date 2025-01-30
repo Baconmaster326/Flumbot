@@ -241,7 +241,7 @@ async def quip_image(link):
             raise Exception
     except Exception as e:
         print(e)
-        model = genai.GenerativeModel(model_name='gemini-pro', safety_settings=safety_settings)
+        model = genai.GenerativeModel(model_name='gemini-1.5-pro-001', safety_settings=safety_settings)
         response = model.generate_content(
             f"{prompt}. I just showed you something disgusting, tell me your thoughts on that. You experience intense "
             f"pain looking at the image.")

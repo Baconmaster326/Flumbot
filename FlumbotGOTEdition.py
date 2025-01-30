@@ -96,8 +96,13 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    messagetobot = str(message.content)
+    user = str(message.author)
+    channel = message.channel.name
+    guild = message.channel.guild.name
+
     if message.author == client.user:
-        if "hey flumbot" in message.content:
+        if "hey flumbot" in messagetobot.lower():
             print("new awake rule to add")
         else:
             return
@@ -105,10 +110,6 @@ async def on_message(message):
     if message.type.name == "reply" and message.reference.resolved.author == client.user:        #are we being @'d?
         message.content = "hey flumbot, " + message.content
 
-    messagetobot = str(message.content)
-    user = str(message.author)
-    channel = message.channel.name
-    guild = message.channel.guild.name
     print(f"=========\n{user} said {messagetobot} in {channel} || {guild}\nchecking for commands...")
 
     print("\n=====Nothing else found, proceed to read commands=====\n")
