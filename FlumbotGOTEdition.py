@@ -19,15 +19,14 @@ import daystart
 import shutil
 import psutil
 import yt_dlp
+import platform
 
 pilot = 0
 dev = 0
 
 client = commands.Bot(command_prefix='', intents=discord.Intents.all(), case_insensitive=True)
 
-try:
-    os.chdir('/root/Flumbot')
-except Exception as e:
+if (platform.system() == 'Windows'):
     print("You're in the testing environment")
     dev = 1
 

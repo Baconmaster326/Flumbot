@@ -5,6 +5,7 @@ import discord
 import asyncio
 import google.generativeai as genai
 import os
+import platform
 
 
 safety_settings = [
@@ -29,12 +30,6 @@ safety_settings = [
 prompt = "Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, " \
          "snarky remarks, and dated references. Please keep your replies somewhat short (under 200 characters) as " \
          "they are targeted for a discord chatbot."
-
-
-try:
-    os.chdir('/root/Flumbot')
-except Exception as e:
-    print("You're in the testing environment")
 
 with open('token.json', "r") as file:
     data = json.load(file)
