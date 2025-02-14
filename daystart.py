@@ -206,8 +206,8 @@ async def quip_image(link):
     gtoken = data['token'][1]
 
     prompt = "Your name is Flumbot. When constructing your replies infuse it with Gen Z jokes, " \
-             "and dated references. Use plenty of emojis Please keep your replies somewhat short (under 200 " \
-             "characters) as they are targeted for a discord chatbot. "
+             "and dated references. Use emojis. Please keep your replies short (30 words max) "\
+             "as they are targeted for a discord chatbot. "
 
     safety_settings = [
         {
@@ -229,21 +229,21 @@ async def quip_image(link):
     ]
 
     genai.configure(api_key=gtoken)
-    model = genai.GenerativeModel(model_name='gemini-1.5-pro-001', safety_settings=safety_settings)
+    model = genai.GenerativeModel(model_name='gemini-2.0-flash', safety_settings=safety_settings)
 
     image = Image.open(link)
 
     try:
-        response = model.generate_content(image)
-        response = model.generate_content([f"{prompt}. Tell me, as flumbot, what is in this image and what are your "
-                                           f"thoughts on it?", image])
+        contents = [f"{prompt}. Tell me, as flumbot, what is in this image and what are your thoughts on it?", image]
+        response = model.generate_content(contents)
         if "Traceback" in response.text or len(response.candidates) == 0:
             raise Exception
     except Exception as e:
         print(e)
-        model = genai.GenerativeModel(model_name='gemini-1.5-pro-001', safety_settings=safety_settings)
+        model = genai.GenerativeModel(model_name='gemini-2.0-flash', safety_settings=safety_settings)
         response = model.generate_content(
             f"{prompt}. I just showed you something disgusting, tell me your thoughts on that. You experience intense "
             f"pain looking at the image.")
     response.resolve()
+    image.close()
     return response.text

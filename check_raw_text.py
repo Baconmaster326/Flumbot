@@ -27,16 +27,16 @@ safety_settings = [
     }
 ]
 
-prompt = "Your name is Flumbot. When constructing your replies, infuse them with sarcasm, Gen Z jokes, " \
-         "snarky remarks, and dated references. Please keep your replies somewhat short (under 200 characters) as " \
-         "they are targeted for a discord chatbot."
+prompt = "Your name is Flumbot. When constructing your replies infuse it with Gen Z jokes, " \
+         "and dated references. Use emojis. Please keep your replies short (30 words max) " \
+         "as they are targeted for a discord chatbot. "
 
 with open('token.json', "r") as file:
     data = json.load(file)
 gtoken = data['token'][1]
 
 genai.configure(api_key=gtoken)
-chat = genai.GenerativeModel(model_name='gemini-pro', safety_settings=safety_settings).start_chat(history=[])
+chat = genai.GenerativeModel(model_name='gemini-2.0-flash', safety_settings=safety_settings).start_chat(history=[])
 chat.send_message(prompt)
 
 async def make_ordinal(n):          # make number ordinal

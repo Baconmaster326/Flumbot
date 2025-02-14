@@ -49,7 +49,7 @@ async def on_ready():
     print("Synced commands list")
     if dev:
         link = await daystart.link()
-        await daystart.quip_image(link)
+        print (await daystart.quip_image(link))
         return
 
     altfilename = './bin/en_data/longtermdata.json'
@@ -81,7 +81,7 @@ async def on_ready():
         msg = f"Give it up for Day {deltaday}! Day {deltaday}!"
         await channel.send(msg)
         #send random reddit or 4chin link
-        if random.randint(0, 10) > 5:
+        if random.randint(0, 10) > 9:
             #send reddit link
             link = await daystart.link()
         else:
