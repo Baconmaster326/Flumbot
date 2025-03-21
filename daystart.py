@@ -4,6 +4,8 @@ import os
 import random
 import shutil
 import re
+import PIL
+import io
 import discord
 import requests
 import asyncpraw
@@ -159,7 +161,7 @@ async def link():
 
 
 async def link2():
-    await asyncio.sleep(68)
+    await asyncio.sleep(18)
     # Choose a random board
     boards = ['a', 'c', 'w', 'm', 'cgl', 'cm', 'n', 'jp', 'vp', 'v', 'vg', 'vr', 'co', 'g', 'tv', 'k', 'o', 'an', 'tg',
               'sp', 'asp', 'sci', 'int', 'out', 'toy', 'biz', 'i', 'po', 'p', 'ck', 'ic', 'wg', 'mu', 'fa', '3', 'gd',
@@ -189,13 +191,16 @@ async def link2():
             random_image_url = "https:" + random.choice(image_urls)
             try:
                 image_data = requests.get(random_image_url).content
+                img = Image.open(io.BytesIO(image_data)) # Try to open the image.
+                img.verify() # Verify image integrity.
                 with open("SPOILER_daily.png", "wb") as f:
                     f.write(image_data)
-                return "SPOILER_daily.png" # return the filename
-            except requests.exceptions.RequestException as e:
-                print(f"Error downloading image: {e}")
-                return None
+                return "SPOILER_daily.png"
+            except (requests.exceptions.RequestException, OSError, Image.UnidentifiedImageError) as e:
+                print(f"Error downloading or opening image: {e}")
+                return link2()
         else:
+            print("No pictures found on 4chin board")
             return link()       # we found a bad 4chin board, revert to reddit.
     except Exception as e:
         print(f"Error: {e}")
