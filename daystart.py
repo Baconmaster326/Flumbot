@@ -161,7 +161,7 @@ async def link():
 
 
 async def link2():
-    await asyncio.sleep(18)
+    await asyncio.sleep(65)
     # Choose a random board
     boards = ['a', 'c', 'w', 'm', 'cgl', 'cm', 'n', 'jp', 'vp', 'v', 'vg', 'vr', 'co', 'g', 'tv', 'k', 'o', 'an', 'tg',
               'sp', 'asp', 'sci', 'int', 'out', 'toy', 'biz', 'i', 'po', 'p', 'ck', 'ic', 'wg', 'mu', 'fa', '3', 'gd',
