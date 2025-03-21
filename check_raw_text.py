@@ -103,7 +103,7 @@ async def call_api_and_reply(ctx, message):
         await ctx.channel.send(response.text)
     except Exception as e:
         await ctx.channel.send("me big doo doo head, you raised an " + str(e))
-        chat = genai.GenerativeModel(model_name='gemini-pro', safety_settings=safety_settings).start_chat(history=[])
+        chat = genai.GenerativeModel(model_name='gemini-2.0-flash', safety_settings=safety_settings).start_chat(history=[])
         chat.send_message(prompt)
         response = chat.send_message(message)
         await ctx.channel.send(response.text)

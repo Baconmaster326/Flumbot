@@ -47,9 +47,12 @@ async def on_ready():
     print('---------')
     await client.tree.sync()
     print("Synced commands list")
+
     if dev:
-        link = await daystart.link()
-        print (await daystart.quip_image(link))
+        link = await daystart.link()        # test reddit
+        print(await daystart.quip_image(link))
+        link = await daystart.link2()       # test 4chin
+        print(await daystart.quip_image(link))
         return
 
     altfilename = './bin/en_data/longtermdata.json'

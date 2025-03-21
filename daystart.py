@@ -3,14 +3,16 @@ import json
 import os
 import random
 import shutil
-from datetime import date
+import re
 import discord
 import requests
-import string
 import asyncpraw
 import google.generativeai as genai
-from bs4 import BeautifulSoup
+from datetime import date
 from PIL import Image
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
 
 
 def game():
@@ -157,47 +159,47 @@ async def link():
 
 
 async def link2():
-    await asyncio.sleep(65)
+    await asyncio.sleep(68)
     # Choose a random board
     boards = ['a', 'c', 'w', 'm', 'cgl', 'cm', 'n', 'jp', 'vp', 'v', 'vg', 'vr', 'co', 'g', 'tv', 'k', 'o', 'an', 'tg',
               'sp', 'asp', 'sci', 'int', 'out', 'toy', 'biz', 'i', 'po', 'p', 'ck', 'ic', 'wg', 'mu', 'fa', '3', 'gd',
               'diy', 'wsg', 's', 'hc', 'hm', 'h', 'e', 'u', 'd', 'y', 't', 'hr', 'gif', 'trv', 'fit', 'x', 'lit', 'adv',
               'lgbt', 'mlp', 'b', 'r', 'r9k', 'pol', 'soc', 's4s']
     board = random.choice(boards)
+    #Retrieves a random image URL from a 4chan board using Selenium.
+    try:
+        # prepare scrape-er
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
 
-    # Fetch the board's front page
-    url = f'https://boards.4chan.org/{board}/'
-    response = requests.get(url)
+        # scrape html
+        driver = webdriver.Chrome(options=chrome_options)
+        url = f"https://boards.4chan.org/{board}/"
+        driver.get(url)
+        html_content = driver.page_source
+        driver.quit()
 
-    # Parse the HTML
-    soup = BeautifulSoup(response.text, 'html.parser')
+        # Regex to find image URLs. (This is very fragile and may break.)
+        image_urls = re.findall(r'href="(//i\.4cdn\.org/\w+/\d+\.(?:jpg|jpeg|png|gif|webp))"', html_content)
 
-    # Extract all image links
-    image_links = []
-    for thread in soup.find_all('a', class_='fileThumb'):
-        if len(image_links) > 10:
-            break
-        image_links.append("https://" + thread['href'][2:])
-        await asyncio.sleep(1.5)
-
-    while True:
-        # Choose a random image link
-        image_link = random.choice(image_links)
-
-        response = requests.get(image_link)
-
-        with open("SPOILER_daily.png", 'wb') as f:
-            f.write(response.content)
-            f.close()
-
-        try:
-            Image.open("SPOILER_daily.png")
-            break
-        except Exception as e:
-            print(e)
-            continue
-
-    return "SPOILER_daily.png"
+        # choose a random image from images on site
+        if image_urls:
+            random_image_url = "https:" + random.choice(image_urls)
+            try:
+                image_data = requests.get(random_image_url).content
+                with open("SPOILER_daily.png", "wb") as f:
+                    f.write(image_data)
+                return "SPOILER_daily.png" # return the filename
+            except requests.exceptions.RequestException as e:
+                print(f"Error downloading image: {e}")
+                return None
+        else:
+            return link()       # we found a bad 4chin board, revert to reddit.
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
 
 
 async def quip_image(link):
@@ -249,3 +251,37 @@ async def quip_image(link):
     response.resolve()
     image.close()
     return response.text
+
+async def get_random_image_from_wikimedia():
+    # Retrieves a random image URL from Wikimedia Commons.
+    try:
+        # Get a random page title from Wikimedia Commons.
+        random_page_api_url = "https://commons.wikimedia.org/w/api.php?action=query&list=random&rnnamespace=6&rnlimit=1&format=json"
+        random_page_response = requests.get(random_page_api_url)
+        random_page_response.raise_for_status()
+        random_page_data = random_page_response.json()
+        filename = random_page_data["query"]["random"][0]["title"]
+
+        # Get the image URL using the File Usage API.
+        file_info_api_url = f"https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url&titles={filename}&format=json"
+        file_info_response = requests.get(file_info_api_url)
+        file_info_response.raise_for_status()
+        file_info_data = file_info_response.json()
+
+        pages = file_info_data["query"]["pages"]
+        for page_id, page_info in pages.items():
+            if "imageinfo" in page_info and page_info["imageinfo"]:
+                return page_info["imageinfo"][0]["url"]
+
+        return None  # No image URL found
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching data: {e}")
+        return None
+    except KeyError as e:
+        print(f"KeyError: {e}. API structure may have changed.")
+        return None
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return None
+
