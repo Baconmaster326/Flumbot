@@ -622,10 +622,12 @@ async def flum(ctx, action, arg):
 @client.hybrid_command(name='surprise', description='flumbot how scandelous of you!', pass_context=True)
 async def surprise(ctx):
     await ctx.send("you got it boss", ephemeral=True, delete_after=float(10))
-    if random.randint(0, 1) == 1:
-        link = await daystart.link2()
+    if random.randint(0, 2) == 1:
+        link = await daystart.get_random_image_from_reddit()
+    elif random.randint(0, 2) == 1:
+        link = await daystart.get_random_image_from_pixiv()
     else:
-        link = await daystart.link2()
+        link = await daystart.get_random_image_from_4chan()
     await ctx.channel.send(file=discord.File(link))
     await ctx.channel.send(await daystart.quip_image(link))
     os.remove(link)
