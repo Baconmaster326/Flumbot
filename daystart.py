@@ -13,7 +13,9 @@ import google.generativeai as genai
 from datetime import date
 from PIL import Image
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from webdriver_manager.firefox import GeckoDriverManager
 
 
 
@@ -171,13 +173,14 @@ async def link2():
     #Retrieves a random image URL from a 4chan board using Selenium.
     try:
         # prepare scrape-er
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        firefox_options = FirefoxOptions()
+        firefox_options.add_argument("--headless")
+        firefox_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ("
+                                     "KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
 
-        # scrape html
-        driver = webdriver.Chrome(options=chrome_options)
+        # scrape
+        service = FirefoxService(GeckoDriverManager().install())
+        driver = webdriver.Firefox(service=service, options=firefox_options)
         url = f"https://boards.4chan.org/{board}/"
         driver.get(url)
         html_content = driver.page_source
