@@ -293,8 +293,9 @@ async def get_random_image_from_pixiv():
         api.auth(refresh_token=await get_refresh_token())
         print("Login successful!")
         # Topics we want to get random images for
-        SEARCH_QUERY = ["R-18", "R18", "R-18G", "original", "Sonic", "Pokemon", "Cartoon Network", "Horse Girl", "Neko",
-                        "girl", "boy", "kemono"]
+        SEARCH_QUERY = ["R-18", "R18", "R-18G", "original", "Sonic", "Pokemon", "Cartoon_Network", "Horse Girl", "Neko",
+                        "girl", "male", "female", "kemono", "POV", "mature", "anime", "aircraft", "minecraft", "concept"
+                        ]
         # grab a random result
         search_result = api.search_illust(random.choice(SEARCH_QUERY), sort='date_desc')
         if not search_result or not search_result.illusts:
