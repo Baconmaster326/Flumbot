@@ -49,9 +49,11 @@ async def on_ready():
     print("Synced commands list")
 
     if dev:
-        link = await daystart.link()        # test reddit
+        link = await daystart.get_random_image_from_pixiv()     # test pixiv
         print(await daystart.quip_image(link))
-        link = await daystart.link2()       # test 4chin
+        link = await daystart.get_random_image_from_reddit()    # test reddit
+        print(await daystart.quip_image(link))
+        link = await daystart.get_random_image_from_4chan()     # test 4chin
         print(await daystart.quip_image(link))
         return
 
@@ -84,12 +86,15 @@ async def on_ready():
         msg = f"Give it up for Day {deltaday}! Day {deltaday}!"
         await channel.send(msg)
         #send random reddit or 4chin link
-        if random.randint(0, 10) > 5:
-            #send reddit link
-            link = await daystart.link()
+        if random.randint(0, 15) > 7:
+            #send 4chan link
+            link = await daystart.get_random_image_from_4chan()
+        elif random.randint(0, 10) > 5:
+            #send pixiv
+            link = await daystart.get_random_image_from_pixiv()
         else:
-            #send 4chin
-            link = await daystart.link2()
+            #send reddit
+            link = await daystart.get_random_image_from_reddit()
         await channel.send(file=discord.File(link))
         await channel.send(await daystart.quip_image(link))
         os.remove(link)

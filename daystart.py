@@ -10,13 +10,14 @@ import discord
 import requests
 import asyncpraw
 import google.generativeai as genai
+from gppt import GetPixivToken
+from pixivpy3 import AppPixivAPI
 from datetime import date
 from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from webdriver_manager.firefox import GeckoDriverManager
-
 
 
 def game():
@@ -133,7 +134,7 @@ async def profile(client):
         os.remove('image.jpg')
 
 
-async def link():
+async def get_random_image_from_reddit():
     with open('token.json', "r") as file:
         data = json.load(file)
     rtoken = data['token'][2]
@@ -162,7 +163,7 @@ async def link():
     return "SPOILER_daily.png"
 
 
-async def link2():
+async def get_random_image_from_4chan():
     await asyncio.sleep(65)
     # Choose a random board
     boards = ['a', 'c', 'w', 'm', 'cgl', 'cm', 'n', 'jp', 'vp', 'v', 'vg', 'vr', 'co', 'g', 'tv', 'k', 'o', 'an', 'tg',
@@ -194,17 +195,20 @@ async def link2():
             random_image_url = "https:" + random.choice(image_urls)
             try:
                 image_data = requests.get(random_image_url).content
-                img = Image.open(io.BytesIO(image_data)) # Try to open the image.
-                img.verify() # Verify image integrity.
+                #Try to open image.
+                img = Image.open(io.BytesIO(image_data))
+                # Verify image.
+                img.verify()
+                print(random_image_url)
                 with open("SPOILER_daily.png", "wb") as f:
                     f.write(image_data)
                 return "SPOILER_daily.png"
             except (requests.exceptions.RequestException, OSError, Image.UnidentifiedImageError) as e:
                 print(f"Error downloading or opening image: {e}")
-                return link2()
+                return "SPOILER_daily.png"
         else:
             print("No pictures found on 4chin board")
-            return link()       # we found a bad 4chin board, revert to reddit.
+            return get_random_image_from_reddit()  # we found a bad 4chin board, revert to reddit.
     except Exception as e:
         print(f"Error: {e}")
         return None
@@ -260,36 +264,77 @@ async def quip_image(link):
     image.close()
     return response.text
 
-async def get_random_image_from_wikimedia():
-    # Retrieves a random image URL from Wikimedia Commons.
+
+async def get_refresh_token():
+    # check if we already have the token generated
+    with open("token.json", "r") as f:
+        data = json.load(f)
+    # check if token is valid
     try:
-        # Get a random page title from Wikimedia Commons.
-        random_page_api_url = "https://commons.wikimedia.org/w/api.php?action=query&list=random&rnnamespace=6&rnlimit=1&format=json"
-        random_page_response = requests.get(random_page_api_url)
-        random_page_response.raise_for_status()
-        random_page_data = random_page_response.json()
-        filename = random_page_data["query"]["random"][0]["title"]
-
-        # Get the image URL using the File Usage API.
-        file_info_api_url = f"https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url&titles={filename}&format=json"
-        file_info_response = requests.get(file_info_api_url)
-        file_info_response.raise_for_status()
-        file_info_data = file_info_response.json()
-
-        pages = file_info_data["query"]["pages"]
-        for page_id, page_info in pages.items():
-            if "imageinfo" in page_info and page_info["imageinfo"]:
-                return page_info["imageinfo"][0]["url"]
-
-        return None  # No image URL found
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching data: {e}")
-        return None
-    except KeyError as e:
-        print(f"KeyError: {e}. API structure may have changed.")
-        return None
+        api = AppPixivAPI()
+        api.auth(refresh_token=data['token'][3])
+        refresh_token = data['token'][3]
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        return None
+        print(f"An error occurred: {e}")
+        # usually this means we need a new token, as the other one expired
+        g = GetPixivToken(headless=True)
+        refresh_token = g.login(username="user_nkhz5545", password=data['token'][4])["refresh_token"]
+        data['token'][3] = refresh_token
+        # dump the new token to the file just in case
+        with open("token.json", "w") as f:
+            json.dump(data, f)
+    return refresh_token
+
+
+async def get_random_image_from_pixiv():
+    api = AppPixivAPI()
+    try:
+        # Login
+        api.auth(refresh_token=await get_refresh_token())
+        print("Login successful!")
+        # Topics we want to get random images for
+        SEARCH_QUERY = ["R-18", "R18", "R-18G", "original", "Sonic", "Pokemon", "Cartoon Network", "Horse Girl", "Neko",
+                        "girl", "boy", "kemono"]
+        # grab a random result
+        search_result = api.search_illust(random.choice(SEARCH_QUERY), sort='date_desc')
+        if not search_result or not search_result.illusts:
+            print(f"No illustrations found for query: {SEARCH_QUERY}")
+            # this is broken, breakout get a reddit image
+            return get_random_image_from_reddit()
+
+        illustration = random.choice(search_result.illusts)
+        # print out information about image
+        print("Retrieved random illustration:")
+        print(f"  Title: {illustration.title}")
+        print(f"  Author: {illustration.user.name}")
+        print(f"  URL: https://www.pixiv.net/en/artworks/{illustration.id}")
+
+        # time to grab the direct image link
+        url = illustration.image_urls['medium']
+        # ensure we have a properly former header, they reject all calls without these
+        headers = {
+            'Referer': f'https://www.pixiv.net/en/artworks/{illustration.id}',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+            'Accept': 'image/jpeg,image/png,*/*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br'
+        }
+        try:
+            # open the webpage
+            image_data = requests.get(url, headers=headers).content
+            # Try to open the image.
+            img = Image.open(io.BytesIO(image_data))
+            # Verify image
+            img.verify()
+            # Save Image
+            with open("SPOILER_daily.png", "wb") as f:
+                f.write(image_data)
+            return "SPOILER_daily.png"
+        except (requests.exceptions.RequestException, OSError, Image.UnidentifiedImageError) as e:
+            print(f"Error downloading or opening image: {e}")
+            return get_random_image_from_reddit()
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        print("Please check your credentials or the illustration ID.")
 
