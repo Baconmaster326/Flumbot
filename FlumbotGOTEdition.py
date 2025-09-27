@@ -10,6 +10,7 @@ from discord.ext.commands import CommandNotFound
 from datetime import date
 import check_raw_text
 import check_count
+import generativeai
 import voiceplay
 import os
 import json
@@ -21,22 +22,26 @@ import psutil
 import yt_dlp
 import platform
 
+# start Discord client
+client = commands.Bot(command_prefix='', intents=discord.Intents.all(), case_insensitive=True)
+
+# setup logging
+logging.basicConfig(handlers=[logging.FileHandler('debug.log')], level=logging.DEBUG)
+logger = logging.getLogger()
+logger.debug(f"Logger Initialized for {datetime.time()}")
+
+# globals for autopilot
 pilot = 0
 dev = 0
 
-client = commands.Bot(command_prefix='', intents=discord.Intents.all(), case_insensitive=True)
+# Grab discord api token
+with open('token.json', "r") as file:
+    data = json.load(file)
+token = data['token'][0]
 
 if (platform.system() == 'Windows'):
     print("You're in the testing environment")
     dev = 1
-
-logging.basicConfig(handlers=[logging.FileHandler('debug.log')], level=logging.DEBUG)
-logger = logging.getLogger()
-logger.debug("Logger Initialized")
-
-with open('token.json', "r") as file:
-    data = json.load(file)
-token = data['token'][0]
 
 @client.event
 async def on_ready():
@@ -49,12 +54,6 @@ async def on_ready():
     print("Synced commands list")
 
     if dev:
-        link = await daystart.get_random_image_from_pixiv()     # test pixiv
-        print(await daystart.quip_image(link))
-        link = await daystart.get_random_image_from_reddit()    # test reddit
-        print(await daystart.quip_image(link))
-        link = await daystart.get_random_image_from_4chan()     # test 4chin
-        print(await daystart.quip_image(link))
         return
 
     altfilename = './bin/en_data/longtermdata.json'
@@ -85,16 +84,8 @@ async def on_ready():
         await channel.send(msg)
         msg = f"Give it up for Day {deltaday}! Day {deltaday}!"
         await channel.send(msg)
-        #send random reddit or 4chin link
-        if random.randint(0, 15) > 7:
-            #send 4chan link
-            link = await daystart.get_random_image_from_4chan()
-        elif random.randint(0, 10) > 5:
-            #send pixiv
-            link = await daystart.get_random_image_from_pixiv()
-        else:
-            #send reddit
-            link = await daystart.get_random_image_from_reddit()
+        #send random reddit, 4chin, or pixiv link
+        link = await daystart.makelink()
         await channel.send(file=discord.File(link))
         await channel.send(await daystart.quip_image(link))
         os.remove(link)
@@ -120,6 +111,11 @@ async def on_message(message):
     print(f"=========\n{user} said {messagetobot} in {channel} || {guild}\nchecking for commands...")
 
     print("\n=====Nothing else found, proceed to read commands=====\n")
+
+    #await voiceplay.join(message, client)
+    #await asyncio.sleep(5)
+    #await voiceplay.leave(message, client)
+
     await check_raw_text.parse(message)
 
     if len(str(message.content).split()) == 1:
@@ -438,20 +434,6 @@ async def restart(ctx):
     await ctx.send("cry :(", ephemeral=True, delete_after=float(10))
     os.startfile('restart.py')
     exit()
-async def kill_server():
-    await asyncio.sleep(7200)
-    PROC_NAME = "bedrock_server.exe"
-
-    for proc in psutil.process_iter():
-        # check whether the process to kill name matches
-        if proc.name() == PROC_NAME:
-            proc.kill()
-    pass
-@client.hybrid_command(name='minecraft', description='raise the electricity', pass_context=True)
-async def minecraft(ctx):
-    await ctx.send("cummin right up", ephemeral=True, delete_after=float(10))
-    os.startfile('bedrock_server.exe.lnk')
-    asyncio.create_task(kill_server())
 
 @client.hybrid_command(name='flip', description='flip a standard US coin', pass_context=True)
 async def flip(ctx, args):

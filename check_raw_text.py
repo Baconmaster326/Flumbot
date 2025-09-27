@@ -3,43 +3,9 @@ import random
 import time
 import discord
 import asyncio
-import google.generativeai as genai
+import generativeai
 import os
 import platform
-
-
-safety_settings = [
-    {
-        "category": "HARM_CATEGORY_HARASSMENT",
-        "threshold": "BLOCK_NONE"
-    },
-    {
-        "category": "HARM_CATEGORY_HATE_SPEECH",
-        "threshold": "BLOCK_NONE"
-    },
-    {
-        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-        "threshold": "BLOCK_NONE"
-    },
-    {
-        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-        "threshold": "BLOCK_NONE"
-    }
-]
-
-prompt = "Your name is Flumbot, you are a knowledgeable member of the group chat, answering any questions one may " \
-         "have and participating in the friendly banter in a succinct, wholesome, helpful manner. However, " \
-         "You do love to input your own snark, quips, fun facts and whimsy where appropriate. You are kind and " \
-         "receptive to criticism, but you can come off as harsh and direct, as your messages and responses  are very " \
-         "succinct, being no more than 30 words. "
-
-with open('token.json', "r") as file:
-    data = json.load(file)
-gtoken = data['token'][1]
-
-genai.configure(api_key=gtoken)
-chat = genai.GenerativeModel(model_name='gemini-2.0-flash', safety_settings=safety_settings).start_chat(history=[])
-chat.send_message(prompt)
 
 async def make_ordinal(n):          # make number ordinal
     '''
@@ -93,23 +59,6 @@ async def fortune(ctx):
         await ctx.send(msg, tts=True)
 
 
-async def call_api_and_reply(ctx, message):
-    global chat
-    global prompt
-    global safety_settings
-
-    try:
-        response = chat.send_message(message)
-        await ctx.channel.send(response.text)
-    except Exception as e:
-        await ctx.channel.send("me big doo doo head, you raised an " + str(e))
-        chat = genai.GenerativeModel(model_name='gemini-2.0-flash', safety_settings=safety_settings).start_chat(history=[])
-        chat.send_message(prompt)
-        response = chat.send_message(message)
-        await ctx.channel.send(response.text)
-        print(e)
-
-
 async def parse(ctx):
     
     message = str(ctx.content)                  # message is the full string
@@ -160,7 +109,7 @@ async def parse(ctx):
 
 
     if "hey flumbot" in message.lower() and len(words) > 2:
-        asyncio.create_task(call_api_and_reply(ctx, message))
+        asyncio.create_task(generativeai.quip_this(ctx.channel, message))
         return
 
     if "flumbot" in message.lower():    # self awareness

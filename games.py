@@ -63,7 +63,7 @@ async def midimania(ctx, client):
     for file in os.listdir("./"):  # clear previous midis justincase
         if file.endswith(".wav"):
             os.remove(file)
-    await ctx.respond("Launching midimania!", ephemeral=True, delete_after=float(1))
+    await ctx.send("Launching midimania!", ephemeral=True, delete_after=float(1))
     msg = await ctx.send("Please wait while I prepare your midi :)", tts=True)
     midifiles = []
     filenames = []

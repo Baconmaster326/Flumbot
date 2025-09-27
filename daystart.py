@@ -5,11 +5,11 @@ import random
 import shutil
 import re
 import PIL
+import generativeai
 import io
 import discord
 import requests
 import asyncpraw
-import google.generativeai as genai
 from gppt import GetPixivToken
 from pixivpy3 import AppPixivAPI
 from datetime import date
@@ -49,6 +49,15 @@ def days():
     start = today - date(2019, 2, 26)
     return int(start.days)
 
+async def makelink():
+    flag = random.choices([1, 2, 3], weights=[33, 33, 33], k=1)
+    if flag == 1:
+        link = await get_random_image_from_4chan()
+    elif flag == 2:
+        link = await get_random_image_from_pixiv()
+    else:
+        link = await get_random_image_from_reddit()
+    return link
 
 async def activity():
     quips = './bin/en_data/quips.json'
@@ -162,7 +171,7 @@ async def get_random_image_from_reddit():
 
     return "SPOILER_daily.png"
 
-
+#TODO Clean this up
 async def get_random_image_from_4chan():
     await asyncio.sleep(65)
     # Choose a random board
@@ -214,55 +223,11 @@ async def get_random_image_from_4chan():
         return None
 
 
-async def quip_image(link):
-    with open('token.json', "r") as file:
-        data = json.load(file)
-    gtoken = data['token'][1]
-
-    prompt = "Your name is Flumbot, you are a knowledgeable member of the group chat, answering any questions one may " \
-             "have and participating in the friendly banter in a succinct, wholesome, helpful manner. However, " \
-             "You do love to input your own snark, quips, fun facts and whimsy where appropriate. You are kind and " \
-             "receptive to criticism, but you can come off as harsh and direct, as your messages and responses  are " \
-             "very succinct, being no more than 30 words. "
-
-    safety_settings = [
-        {
-            "category": "HARM_CATEGORY_HARASSMENT",
-            "threshold": "BLOCK_NONE"
-        },
-        {
-            "category": "HARM_CATEGORY_HATE_SPEECH",
-            "threshold": "BLOCK_NONE"
-        },
-        {
-            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            "threshold": "BLOCK_NONE"
-        },
-        {
-            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-            "threshold": "BLOCK_NONE"
-        }
-    ]
-
-    genai.configure(api_key=gtoken)
-    model = genai.GenerativeModel(model_name='gemini-2.0-flash', safety_settings=safety_settings)
-
+async def quip_image(channel, link):
     image = Image.open(link)
-
-    try:
-        contents = [f"{prompt}. Tell me, as flumbot, what is in this image and what are your thoughts on it?", image]
-        response = model.generate_content(contents)
-        if "Traceback" in response.text or len(response.candidates) == 0:
-            raise Exception
-    except Exception as e:
-        print(e)
-        model = genai.GenerativeModel(model_name='gemini-2.0-flash', safety_settings=safety_settings)
-        response = model.generate_content(
-            f"{prompt}. I just showed you something disgusting, tell me your thoughts on that. You experience intense "
-            f"pain looking at the image.")
-    response.resolve()
+    await generativeai.quip_this(channel, "", image)
     image.close()
-    return response.text
+    return
 
 
 async def get_refresh_token():

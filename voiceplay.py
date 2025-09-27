@@ -3,25 +3,34 @@ import discord
 import librosa
 import json
 
+
+async def join(channel):
+    try:
+        voice_client = await channel.connect()
+    except AttributeError:
+        voice_client = None
+    return voice_client
+
+
+async def leave(voice_client):
+    await voice_client.disconnect(force=True)
+    return True
+
 async def playclip(cliplocation, ctx, client, overide):
     def check(m):
         return m.content.lower() == 'stop' or m.content.lower() == 'skip'
-
-    try:                                                                                   # is user in a voice channel?
-        channel = ctx.author.voice.channel
+                                                                              # is user in a voice channel?
+    try:
+        voice_client = await join(ctx.author.voice.channel)
     except AttributeError:
-        # msg = "Can't Fool me :triumph: you aren't even in the voice chat :triumph:"
-        # await ctx.send(msg)
-        return False
+        ctx.send("Can't fool me :triumph: you aren't even in the voice chat :triumph:")
+        return
 
     duration = librosa.get_duration(filename=cliplocation) + 1.5                              # get duration
 
     if overide != 0:                                                                       # are we constrained on time?
         duration = overide
-
-    if ctx.voice_client is not None:
-        return await ctx.voice_client.move_to(channel)
-    await channel.connect()
+    await voice_client.connect()
 
     if duration > 60:
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio("./Clips/Oneoff/alert.wav"))
