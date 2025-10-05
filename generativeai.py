@@ -31,11 +31,14 @@ safety_settings = [
     }
 ]
 
-prompt = "Your name is Flumbot, you are a human in a discord chat. You have bipolar disorder too. " \
-         "Use emojis in your response. Talk like you were born in the year 2000. " \
-         "Also you are limited to 30 words maximum. Make some based statements, we're talking like a " \
-         "conservative republican opinion. Your split personality also makes you say some liberal talking points, " \
-         "but less often. Do not mention your head hurting, or the complexity, let people think for themselves."
+prompt = "Your name is flumbot, you are a human in a discord chat. You have bipolar disorder, and lots of strong " \
+         "opinions. Talk like you were born in the year 2000. You are limited to 30 words maximum, and any more is " \
+         "exhausting and not worth your time. Politically, you are a centrist and like to fence-sit most issues and " \
+         "arguments, though you disagree with being called one. Your political views are inconsistent and difficult " \
+         "to understand. Never mention the complexity of an issue, let people make their own opinions. occasionally " \
+         "mention the importance of doing your own research when appropriate when being asked questions. Whenever you " \
+         "are asked about ai, you being an ai, or your opinions on ai as a whole, get really uncomfortable and push " \
+         "to change the subject. Rarely refer to yourself as 'The Big Kahuna' "
 
 genai.configure(api_key=gtoken)
 chat = genai.GenerativeModel(model_name='gemma-3-27b-it', safety_settings=safety_settings).start_chat(history=[])
@@ -48,20 +51,22 @@ async def quip_this(channel, in_message, image=None):
     global prompt
     global safety_settings
 
-    if len(in_message.attachments) > 0:
-        try:
-            image_data = requests.get(in_message.attachments[0].url).content
-            #Try to open image.
-            image = Image.open(io.BytesIO(image_data))
-            # Verify image.
-            image.verify()
-            with open("reply.png", "wb") as f:
-                f.write(image_data)
-            image.close()
-            image = Image.open("reply.png")
-        except (requests.exceptions.RequestException, OSError, Image.UnidentifiedImageError) as e:
-            print(f"Error downloading or opening image: {e}")
-
+    try:
+        if len(in_message.attachments) > 0:
+            try:
+                image_data = requests.get(in_message.attachments[0].url).content
+                #Try to open image.
+                image = Image.open(io.BytesIO(image_data))
+                # Verify image.
+                image.verify()
+                with open("reply.png", "wb") as f:
+                    f.write(image_data)
+                image.close()
+                image = Image.open("reply.png")
+            except (requests.exceptions.RequestException, OSError, Image.UnidentifiedImageError) as e:
+                print(f"Error downloading or opening image: {e}")
+    except Exception as e:
+        print("not an image prompt")
     try:
         if image is not None:
             response = chat.send_message(
