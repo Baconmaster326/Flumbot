@@ -109,7 +109,11 @@ async def parse(ctx):
 
 
     if "hey flumbot" in message.lower() and len(words) > 2:
-        asyncio.create_task(generativeai.quip_this(ctx.channel, message))
+        if len(ctx.attachments) > 0:
+            if 'image' in ctx.attachments[0].content_type:
+                asyncio.create_task(generativeai.quip_this(ctx.channel, ctx))
+        else:
+            asyncio.create_task(generativeai.quip_this(ctx.channel, message))
         return
 
     if "flumbot" in message.lower():    # self awareness

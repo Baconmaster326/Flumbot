@@ -1,5 +1,11 @@
+import PIL.Image
+import PIL
+from PIL import Image
 import google.generativeai as genai
 import json
+import requests
+import io
+import os
 import asyncio
 
 with open('token.json', "r") as file:
@@ -42,11 +48,27 @@ async def quip_this(channel, in_message, image=None):
     global prompt
     global safety_settings
 
+    if len(in_message.attachments) > 0:
+        try:
+            image_data = requests.get(in_message.attachments[0].url).content
+            #Try to open image.
+            image = Image.open(io.BytesIO(image_data))
+            # Verify image.
+            image.verify()
+            with open("reply.png", "wb") as f:
+                f.write(image_data)
+            image.close()
+            image = Image.open("reply.png")
+        except (requests.exceptions.RequestException, OSError, Image.UnidentifiedImageError) as e:
+            print(f"Error downloading or opening image: {e}")
+
     try:
         if image is not None:
             response = chat.send_message(
                 ["Tell me, as flumbot, what is in this image and what are your thoughts on it?", image])
             await channel.send(response.text)
+            image.close()
+            os.remove("reply.png")
             return
         else:
             response = chat.send_message(in_message)

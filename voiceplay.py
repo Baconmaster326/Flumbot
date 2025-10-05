@@ -23,24 +23,23 @@ async def playclip(cliplocation, ctx, client, overide):
     try:
         voice_client = await join(ctx.author.voice.channel)
     except AttributeError:
-        ctx.send("Can't fool me :triumph: you aren't even in the voice chat :triumph:")
+        await ctx.channel.send("Can't fool me :triumph: you aren't even in the voice chat :triumph:")
         return
 
     duration = librosa.get_duration(filename=cliplocation) + 1.5                              # get duration
 
     if overide != 0:                                                                       # are we constrained on time?
         duration = overide
-    await voice_client.connect()
 
     if duration > 60:
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio("./Clips/Oneoff/alert.wav"))
         await asyncio.sleep(1.5)
-        ctx.voice_client.play(source, after=lambda e: print(f"Player error: {e}") if e else None)
+        voice_client.play(source, after=lambda e: print(f"Player error: {e}") if e else None)
         await asyncio.sleep(5.3)
 
     source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(cliplocation))
     await asyncio.sleep(1.5)
-    ctx.voice_client.play(source, after=lambda e: print(f"Player error: {e}") if e else None)
+    voice_client.play(source, after=lambda e: print(f"Player error: {e}") if e else None)
 
     print(f"Now Playing {cliplocation}")
 
@@ -64,7 +63,7 @@ async def playclip(cliplocation, ctx, client, overide):
     try:
         await client.wait_for('message', check=check, timeout=duration)
         print('done playing clip')
-        await ctx.voice_client.disconnect(force=True)
+        await voice_client.disconnect(force=True)
         if overide:
             return
         if data[cliplocation] % 10 == 0:
@@ -74,7 +73,7 @@ async def playclip(cliplocation, ctx, client, overide):
             await ctx.send("Clip " + "'" + cliplocation + "'" + " has played " + str(data[cliplocation]) +\
                      " times... \nP\nO\nG", tts=True)
     except asyncio.TimeoutError:
-        await ctx.voice_client.disconnect(force=True)
+        await voice_client.disconnect(force=True)
         print('done playing clip')
         if overide:
             return

@@ -108,13 +108,10 @@ async def on_message(message):
     if message.type.name == "reply" and message.reference.resolved.author == client.user:        #are we being @'d?
         message.content = "hey flumbot, " + message.content
 
+
     print(f"=========\n{user} said {messagetobot} in {channel} || {guild}\nchecking for commands...")
 
     print("\n=====Nothing else found, proceed to read commands=====\n")
-
-    #await voiceplay.join(message, client)
-    #await asyncio.sleep(5)
-    #await voiceplay.leave(message, client)
 
     await check_raw_text.parse(message)
 
@@ -127,6 +124,11 @@ async def on_message(message):
 @client.hybrid_command(name = "midimania", description= "The hit new game hosted by yours truly", pass_context= True)
 async def Midimania(ctx):
     await games.midimania(ctx, client)
+
+@client.hybrid_command(name = "midimaniadx", description= "The spin on the hit new game hosted by yours truly",
+                       pass_context= True)
+async def MidimaniaDX(ctx):
+    await games.midimania(ctx, client, True)
 
 @client.hybrid_command(name = "geddit", description= "Let's GEDDIT", pass_context= True)
 async def Geddit(ctx):

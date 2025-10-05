@@ -19,67 +19,86 @@ class answer_choices(discord.ui.View):
     global winners
     global cheaters
     @discord.ui.button(label="Answer A", style=discord.ButtonStyle.primary)
-    async def A_button_callback(self, button, interaction):
+    async def A_button_callback(self, interaction, button):
         if interaction.user in cheaters:
             return
+        button.disabled = True
         if answer == 1:
             winners.append(interaction.user)
         cheaters.append(interaction.user)
         await interaction.response.edit_message(view=self)  # edit the message's view
     @discord.ui.button(label="Answer B", style=discord.ButtonStyle.secondary)
-    async def B_button_callback(self, button, interaction):
+    async def B_button_callback(self, interaction, button):
         if interaction.user in cheaters:
             return
+        button.disabled = True
         if answer == 2:
             winners.append(interaction.user)
         cheaters.append(interaction.user)
         await interaction.response.edit_message(view=self)  # edit the message's view
     @discord.ui.button(label="Answer C", style=discord.ButtonStyle.success)
-    async def C_button_callback(self, button, interaction):
+    async def C_button_callback(self, interaction, button):
         if interaction.user in cheaters:
             return
+        button.disabled = True
         if answer == 3:
             winners.append(interaction.user)
         cheaters.append(interaction.user)
         await interaction.response.edit_message(view=self)  # edit the message's view
     @discord.ui.button(label="Answer D", style=discord.ButtonStyle.danger)
-    async def D_button_callback(self, button, interaction):
+    async def D_button_callback(self, interaction, button):
         if interaction.user in cheaters:
             return
+        button.disabled = True
         if answer == 4:
             winners.append(interaction.user)
         cheaters.append(interaction.user)
         await interaction.response.edit_message(view=self)  # edit the message's view
 
-async def midimania(ctx, client):
+async def midimania(ctx, client, dx=False):
     global winners
     global answer
     global cheaters
 
+    channel = ctx.channel
+
+    if dx:
+        midilocation = './Music/MIDIDX'
+    else:
+        midilocation = './Music/MIDI'
+
+    # clear winner and cheater list
     winners.clear()
     cheaters.clear()
     answer = 0
+    printable = ":sad:"
 
     for file in os.listdir("./"):  # clear previous midis justincase
         if file.endswith(".wav"):
             os.remove(file)
     await ctx.send("Launching midimania!", ephemeral=True, delete_after=float(1))
-    msg = await ctx.send("Please wait while I prepare your midi :)", tts=True)
+    msg = await channel.send("Please wait while I prepare your midi :)", tts=True)
     midifiles = []
     filenames = []
     soundfonts = []
-    for dirpath, subdirs, files in os.walk('./Music/MIDI'):
+    # gather list of possible midis
+    for dirpath, subdirs, files in os.walk(midilocation):
         for x in files:
             if x.endswith(".mid"):
                 filenames.append(x)
                 midifiles.append(os.path.join(dirpath, x))
+    # gather list of possible soundfonts
     for dirpath, subdirs, files in os.walk('./Music/'):
         for x in files:
             if x.endswith(".sf2"):
                 soundfonts.append(os.path.join(dirpath, x))
+    # pick a soundfont
     soundfont = random.choice(soundfonts)
+    # format soundfont for printing
     printsound = soundfont.split('/')[-1]
+    # pick random midi
     cliplocation = random.choice(midifiles)
+    # convert to midi to wav
     miditoaudio.to_audio(soundfont, cliplocation, './', out_type='wav')
     person = os.path.split(cliplocation)
     person = person[1]
@@ -87,21 +106,25 @@ async def midimania(ctx, client):
     await msg.delete()
     msg = f"It's time to guess that Midi!\nYou'll have 30 seconds to pick the correct song from 4 " \
           f"choices\nPICK ONLY ONE TIME\nI'll play it to you with {printsound}"
-    msg = await ctx.send(msg, tts=True)
+    msg = await channel.send(msg, tts=True)
     await asyncio.sleep(14)
     await msg.delete()
     await voiceplay.playclip(place, ctx, client, 30)
     await asyncio.sleep(3)
 
+    # delete converted midi
     os.remove(place)
     select = random.randint(1, 4)
     answer = select
     A, B, C, D = ' ', ' ', ' ', ' '
-    samples = random.sample(os.listdir('./Music/MIDI/'), 4)
+    test = os.listdir(midilocation)
+    samples = random.sample(midifiles, 4)
+    for index, each in enumerate(samples):
+        samples[index] = os.path.split(each)[1]
     A, B, C, D = str(samples[0])[:-4], str(samples[1])[:-4], str(samples[2])[:-4], str(samples[3])[:-4]
     while A == person or B == person or C == person or D == person:
         print("repetition detected")
-        samples = random.sample(os.listdir('./Music/MIDI/'), 4)
+        samples = random.sample(midifiles, 4)
         A, B, C, D = str(samples[0])[:-4], str(samples[1])[:-4], str(samples[2])[:-4], str(samples[3])[:-4]
 
     if select == 1:
@@ -139,11 +162,11 @@ async def midimania(ctx, client):
         color=discord.Colour.red(),
     )
 
-    msg1 = await ctx.send(embed=embed1)
-    msg2 = await ctx.send(embed=embed2)
-    msg3 = await ctx.send(embed=embed3)
-    msg4 = await ctx.send(embed=embed4)
-    msg5 = await ctx.send(embed=embed5, view=answer_choices())
+    msg1 = await channel.send(embed=embed1)
+    msg2 = await channel.send(embed=embed2)
+    msg3 = await channel.send(embed=embed3)
+    msg4 = await channel.send(embed=embed4)
+    msg5 = await channel.send(embed=embed5, view=answer_choices())
 
     await asyncio.sleep(30)
 
@@ -161,16 +184,20 @@ async def geddit(ctx, client):
     global answer
     global cheaters
 
+    channel = ctx.channel
+
     winners.clear()
     cheaters.clear()
     answer = 0
+    printable = ":sad:"
 
-    reddit = asyncpraw.Reddit(client_id='kyPylZpqbbNzdg',
-                         client_secret='3xCZsd2Ib5GHwM_lkV8F5MzEUYI',
-                         username='FlumbotPRAW',
-                         password='somebodyring?',
-                         user_agent='flumbot')
-
+    with open('token.json', "r") as file:
+        data = json.load(file)
+    rtoken = data['token'][2]
+    reddit = asyncpraw.Reddit(client_id='zQodI26PnfVmAhgdZogiLA',
+                              client_secret=rtoken,
+                              user_agent='FlumbotAPRAW')
+    await ctx.send("Launching geddit!", ephemeral=True, delete_after=float(3))
     id = []
     subreddit = []
     tempreddit = await reddit.subreddit("all")
@@ -182,7 +209,7 @@ async def geddit(ctx, client):
     link = "https://reddit.com" + post.permalink
     msg = "It's time for GEDDIT!\nYou'll have 30 seconds to determine what subreddit the following r/all post came " \
           "from.\nPICK ONLY ONE TIME!!!"
-    msg = await ctx.respond(msg, tts=True)
+    msg = await channel.send(msg, tts=True)
     await asyncio.sleep(12)
     await msg.delete()
 
@@ -229,11 +256,11 @@ async def geddit(ctx, client):
         color=discord.Colour.red(),
     )
 
-    msg1 = await ctx.send(embed=embed1)
-    msg2 = await ctx.send(embed=embed2)
-    msg3 = await ctx.send(embed=embed3)
-    msg4 = await ctx.send(embed=embed4)
-    msg5 = await ctx.send(embed=embed5, view=answer_choices())
+    msg1 = await channel.send(embed=embed1)
+    msg2 = await channel.send(embed=embed2)
+    msg3 = await channel.send(embed=embed3)
+    msg4 = await channel.send(embed=embed4)
+    msg5 = await channel.send(embed=embed5, view=answer_choices())
 
     await asyncio.sleep(30)
 
@@ -244,7 +271,7 @@ async def geddit(ctx, client):
     await msg5.delete()
 
     msg = f"The post was {link} from r/{post.subreddit}"
-    await ctx.send(msg, delete_after=15)
+    await channel.send(msg, delete_after=15)
 
     await winnerlist(ctx, printable, 50)
 
@@ -253,17 +280,20 @@ async def gedditdx(ctx, client, args):
     global answer
     global cheaters
 
+    with open('token.json', "r") as file:
+        data = json.load(file)
+    rtoken = data['token'][2]
+    reddit = asyncpraw.Reddit(client_id='zQodI26PnfVmAhgdZogiLA',
+                              client_secret=rtoken,
+                              user_agent='FlumbotAPRAW')
+
+    channel= ctx.channel
+
     winners.clear()
     cheaters.clear()
     answer = 0
-    await ctx.respond("Launching GedditDX!", ephemeral=True, delete_after=float(1))
-    msg = await ctx.send("Please wait while I peruse your subreddit :D", tts=True)
-
-    reddit = asyncpraw.Reddit(client_id='kyPylZpqbbNzdg',
-                         client_secret='3xCZsd2Ib5GHwM_lkV8F5MzEUYI',
-                         username='FlumbotPRAW',
-                         password='somebodyring?',
-                         user_agent='flumbot')
+    await ctx.send("Launching GedditDX!", ephemeral=True, delete_after=float(3))
+    msg = await channel.send("Please wait while I peruse your subreddit :D", tts=True)
     id = []
     pics = []
     tempreddit = await reddit.subreddit(args)
@@ -299,7 +329,7 @@ async def gedditdx(ctx, client, args):
     else:
         msg = f"It's time to for GEDDITDX!\nYou'll have 30 seconds to determine what picture matches the title that came " \
               f"from r/all\nPICK ONLY ONE TIME!!!"
-    msg1 = await ctx.respond(msg, tts=True)
+    msg1 = await channel.send(msg, tts=True)
     await asyncio.sleep(12)
     await msg1.delete()
     embed = discord.Embed(title=post.title,
@@ -333,9 +363,9 @@ async def gedditdx(ctx, client, args):
         color=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
     )
 
-    msg = await ctx.send(embed=embed)
+    msg = await channel.send(embed=embed)
     await getpicture(answers)
-    message = await ctx.channel.send(file=discord.File('person.jpg'), view=answer_choices())
+    message = await channel.send(file=discord.File('person.jpg'), view=answer_choices())
 
     for file in os.listdir("./"):
         if file.endswith(".jpg"):
@@ -350,10 +380,13 @@ async def gedditdx(ctx, client, args):
 
 async def winnerlist(ctx, printable, mod):
     global winners
+
+    channel = ctx.channel
+
     filename = './bin/en_data/userdata.json'
     with open(filename, "r") as file:
         data = json.load(file)
-    msg = await ctx.send(f"The correct answer was {printable}\n\nCongratulations to:\n", tts=True)
+    msg = await channel.send(f"The correct answer was {printable}\n\nCongratulations to:\n", tts=True)
 
     if len(winners) == 0:
         winners.append(ctx.me)
@@ -374,7 +407,7 @@ async def winnerlist(ctx, printable, mod):
 
     for person in winners:
         embed = discord.Embed(
-            title=f"{str(person)[:-5]} now has {data[str(person)]['score']} marcs!",
+            title=f"{str(person)} now has {data[str(person)]['score']} marcs!",
             color=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
         )
         embed.set_thumbnail(url=person.avatar.url)
@@ -382,16 +415,16 @@ async def winnerlist(ctx, printable, mod):
         d = ImageDraw.Draw(im)
         location = (0, 10)
         text_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-        d.text(location, str(person)[:-5], font=ImageFont.truetype(font='./Pics/sponge.ttf', size=56), fill=text_color)
+        d.text(location, str(person), font=ImageFont.truetype(font='./Pics/sponge.ttf', size=56), fill=text_color)
         im.save("person.png")
         im.close()
         file = discord.File("person.png", filename="person.png")
         embed.set_image(url="attachment://person.png")
-        await ctx.send(file=file, embed=embed)
+        await channel.send(file=file, embed=embed)
     with open(filename, "w") as file:
         json.dump(data, file)
     msg = "\n:clap::clap::clap::clap::clap::clap:\n"
-    await ctx.send(msg, tts=True)
+    await channel.send(msg, tts=True)
     os.remove('person.png')
 
 async def getpicture(links):
