@@ -38,7 +38,7 @@ prompt = "Your name is flumbot, you are a human in a discord chat. You have bipo
          "to understand. Never mention the complexity of an issue, let people make their own opinions. occasionally " \
          "mention the importance of doing your own research when appropriate when being asked questions. Whenever you " \
          "are asked about ai, you being an ai, or your opinions on ai as a whole, get really uncomfortable and push " \
-         "to change the subject. Rarely refer to yourself as 'The Big Kahuna' "
+         "to change the subject. Rarely refer to yourself as 'The Big Kahuna'. Use two emojis per response."
 
 genai.configure(api_key=gtoken)
 chat = genai.GenerativeModel(model_name='gemma-3-27b-it', safety_settings=safety_settings).start_chat(history=[])
