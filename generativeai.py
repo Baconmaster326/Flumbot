@@ -75,6 +75,8 @@ async def quip_this(channel, in_message, image=None):
         else:
             response = chat.send_message(in_message)
             await channel.send(response.text)
+    except FileNotFoundError:
+        print("nothing else to do here")
     except Exception as e:
         # Let them know something went wrong
         await channel.send("me big doo doo head, you raised an " + str(e))
