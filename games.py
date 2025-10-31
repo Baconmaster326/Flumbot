@@ -22,7 +22,6 @@ class answer_choices(discord.ui.View):
     async def A_button_callback(self, interaction, button):
         if interaction.user in cheaters:
             return
-        button.disabled = True
         if answer == 1:
             winners.append(interaction.user)
         cheaters.append(interaction.user)
@@ -31,7 +30,6 @@ class answer_choices(discord.ui.View):
     async def B_button_callback(self, interaction, button):
         if interaction.user in cheaters:
             return
-        button.disabled = True
         if answer == 2:
             winners.append(interaction.user)
         cheaters.append(interaction.user)
@@ -40,7 +38,6 @@ class answer_choices(discord.ui.View):
     async def C_button_callback(self, interaction, button):
         if interaction.user in cheaters:
             return
-        button.disabled = True
         if answer == 3:
             winners.append(interaction.user)
         cheaters.append(interaction.user)
@@ -49,7 +46,6 @@ class answer_choices(discord.ui.View):
     async def D_button_callback(self, interaction, button):
         if interaction.user in cheaters:
             return
-        button.disabled = True
         if answer == 4:
             winners.append(interaction.user)
         cheaters.append(interaction.user)
