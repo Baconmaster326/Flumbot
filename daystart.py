@@ -50,7 +50,7 @@ def days():
     return int(start.days)
 
 async def makelink():
-    flag = random.choices([1, 2, 3], weights=[33, 33, 33], k=1)
+    flag = random.choices([1, 2, 3], weights=[33, 33, 33], k=1)[0]
     if flag == 1:
         link = await get_random_image_from_4chan()
     elif flag == 2:
