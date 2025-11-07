@@ -39,7 +39,7 @@ with open('token.json', "r") as file:
     data = json.load(file)
 token = data['token'][0]
 
-if (platform.system() == 'Windows'):
+if platform.system() == 'Windows':
     print("You're in the testing environment")
     dev = 1
 

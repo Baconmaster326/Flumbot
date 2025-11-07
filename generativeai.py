@@ -81,8 +81,5 @@ async def quip_this(channel, in_message, image=None):
         # Let them know something went wrong
         await channel.send("me big doo doo head, you raised an " + str(e))
         # Restart the chat
-        chat = genai.GenerativeModel(model_name='gemma-3-27b-it', safety_settings=safety_settings).start_chat(
-            history=[])
-        chat.send_message(prompt)
-        response = chat.send_message(in_message)
-        await channel.send(response.text)
+        response = chat.send_message("I just showed you something absolutely vile, it hurts your brain to consider how awful it is.")
+        await channel.send(str(response.text))
