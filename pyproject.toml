@@ -1,0 +1,18 @@
+[project]
+name = "flumbotv4"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "asyncpraw>=7.8.1",
+    "discord-py>=2.6.4",
+    "google-generativeai>=0.8.6",
+    "gppt>=4.3.0",
+    "librosa>=0.11.0",
+    "pillow>=12.1.1",
+    "psutil>=7.2.2",
+    "selenium>=4.40.0",
+    "webdriver-manager>=4.0.2",
+    "yt-dlp>=2026.2.4",
+]

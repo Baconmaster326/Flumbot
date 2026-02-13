@@ -3,7 +3,6 @@ import threading
 import datetime
 import discord
 import requests
-import youtube_dl
 import logging
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
@@ -626,19 +625,19 @@ async def download(link, ctx):
             'preferredquality': '192',
         }],
     }
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([link])
-    for file in os.listdir('./'):
-        if file.endswith(".mp3"):
-            location = os.path.join("./", file)
-    try:
-        shutil.move(location, './Clips/usersub')
-    except:
-        print(f"Duplicate clip <{link}> not added")
-        for file in os.listdir("./"):
-            if file.endswith(".mp3"):
-                os.remove(file)
-        return
+    # with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+    #     ydl.download([link])
+    # for file in os.listdir('./'):
+    #     if file.endswith(".mp3"):
+    #         location = os.path.join("./", file)
+    # try:
+    #     shutil.move(location, './Clips/usersub')
+    # except:
+    #     print(f"Duplicate clip <{link}> not added")
+    #     for file in os.listdir("./"):
+    #         if file.endswith(".mp3"):
+    #             os.remove(file)
+    #     return
     print(f"Successfully added <{link}> to user submissions folder")
 
 def entry(link, ctx):
