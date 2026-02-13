@@ -32,12 +32,12 @@ chat_history = [{"role": "system", "content": prompt}]
 def _chat_send(user_content):
     """Send a message to OpenAI and return the assistant's reply text."""
     global chat_history
-    chat_history.append({"role": "user", "content": user_content})
+    chat_history.append({"role": "user", "content": str(user_content)})
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=chat_history,
     )
-    reply = response.choices[0].message.content
+    reply = response.choices[0].message.content or ""
     chat_history.append({"role": "assistant", "content": reply})
     return reply
 
@@ -56,7 +56,7 @@ def _chat_send_image(text, image_path):
         model="gpt-4o",
         messages=chat_history,
     )
-    reply = response.choices[0].message.content
+    reply = response.choices[0].message.content or ""
     chat_history.append({"role": "assistant", "content": reply})
     return reply
 
