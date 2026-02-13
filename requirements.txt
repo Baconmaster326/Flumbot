@@ -1,0 +1,15 @@
+openai>=1.50.0
+pydantic>=2.11
+discord.py
+requests
+Pillow
+asyncpraw
+asyncprawcore
+gppt
+pixivpy3
+selenium
+webdriver-manager
+psutil
+youtube_dl
+yt-dlp
+librosa
