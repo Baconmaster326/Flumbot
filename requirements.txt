@@ -1,0 +1,14 @@
+openai
+discord.py
+requests
+Pillow
+asyncpraw
+asyncprawcore
+gppt
+pixivpy3
+selenium
+webdriver-manager
+psutil
+youtube_dl
+yt-dlp
+librosa
