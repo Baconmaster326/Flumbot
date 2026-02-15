@@ -1,0 +1,7 @@
+/token.json
+/cookies.txt
+/data/longtermdata.json
+/data/userdata.json
+.idea
+__pycache__
+/debug.log

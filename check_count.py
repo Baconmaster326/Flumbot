@@ -17,10 +17,10 @@ async def parse(ctx):
         await asyncio.sleep(1)
         print("waiting for other server to finish with the file...")
 
-    altfilename = './bin/en_data/longtermdata.json'
+    altfilename = './data/longtermdata.json'
     with open(altfilename, "r") as file:
         data = json.load(file)
-    filename = './bin/en_data/userdata.json'
+    filename = 'data/userdata.json'
     with open(filename, "r") as file:
         userdata = json.load(file)
 
@@ -54,7 +54,7 @@ async def parse(ctx):
                     userdata[username] = {}                             # no inventory, make database entry
                     userdata[username]["score"] = number
 
-            with open('./bin/en_data/emoji.json', "r", encoding="utf8") as file:
+            with open('data/emoji.json', "r", encoding="utf8") as file:
                 emoji = json.load(file)
             tries = 0
             while True:

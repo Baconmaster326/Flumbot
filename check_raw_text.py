@@ -65,7 +65,7 @@ async def parse(ctx):
     words = message.lower().split(" ")          # words is string seperated into a list of words
 
     if 'bet' in words:                          # if person types "bet" respond with bet quip
-        quips = './bin/en_data/quips.json'
+        quips = './data/quips.json'
         with open(quips, "r") as file:
             line = json.load(file)
         msg = "I'll bet " + str(random.choice(line['betmsg']))
@@ -76,25 +76,25 @@ async def parse(ctx):
     context = ["bot"]                              # awarding key words
 
     if any(x in words for x in positive) and any(x in words for x in context):      # good bot check
-        with open("./bin/en_data/longtermdata.json", "r") as file:
+        with open("data/longtermdata.json", "r") as file:
             data = json.load(file)
 
         data['dayvalues']['goodness'] = data['dayvalues']['goodness'] + 1
         msg = f"Thank :clap: you :clap: are :clap: the :clap: {await make_ordinal(data['dayvalues']['goodness'])} :clap: person :clap: to :clap: thank :clap: me. :clap:"
 
-        with open("./bin/en_data/longtermdata.json", "w") as file:
+        with open("data/longtermdata.json", "w") as file:
             json.dump(data, file)
 
         await ctx.channel.send(msg, tts=True)
 
     if any(x in words for x in negative) and any(x in words for x in context):     # bad bot check
-        with open("./bin/en_data/longtermdata.json", "r") as file:
+        with open("data/longtermdata.json", "r") as file:
             data = json.load(file)
 
         data['dayvalues']['goodness'] = data['dayvalues']['goodness'] - 1
         msg = f":rage: You :rage: brought :rage: my :rage: thanks :rage: to :rage: {await make_ordinal(data['dayvalues']['goodness'])} :rage: hope :rage: you :rage: feel :rage: good :rage:"
 
-        with open("./bin/en_data/longtermdata.json", "w") as file:
+        with open("data/longtermdata.json", "w") as file:
             json.dump(data, file)
 
         await ctx.channel.send(msg, tts=True)
@@ -117,7 +117,7 @@ async def parse(ctx):
         return
 
     if "flumbot" in message.lower():    # self awareness
-        quips = './bin/en_data/quips.json'
+        quips = './data/quips.json'
         with open(quips, "r") as file:
             line = json.load(file)
         msg = str(random.choice(line['namemsg']))

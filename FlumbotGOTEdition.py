@@ -55,7 +55,7 @@ async def on_ready():
     if dev:
         return
 
-    altfilename = './bin/en_data/longtermdata.json'
+    altfilename = './data/longtermdata.json'
 
     with open(altfilename, "r") as file:
         data = json.load(file)
@@ -371,10 +371,10 @@ async def sports(ctx):
 
 @client.hybrid_command(name='check-in', description='check in for daily marcs, only avaliable at 7:00 EDT/EST', pass_context=True)
 async def checkin(ctx):
-    filename = './bin/en_data/userdata.json'
+    filename = 'data/userdata.json'
     with open(filename, "r") as file:
         userdata = json.load(file)
-    altfilename = './bin/en_data/longtermdata.json'
+    altfilename = './data/longtermdata.json'
     with open(altfilename, "r") as file:
         data = json.load(file)
     today = date.today()
@@ -470,8 +470,8 @@ async def roll(ctx, sidedness, times, modifier):
 
 @client.hybrid_command(name='flum', description='various flum editing commands, it is amazing!', pass_context=True)
 async def flum(ctx, action, arg):
-    quips = './bin/en_data/quips.json'
-    altfilename = './bin/en_data/longtermdata.json'
+    quips = './data/quips.json'
+    altfilename = './data/longtermdata.json'
 
     action = action.lower().split()
     if len(action) > 1:

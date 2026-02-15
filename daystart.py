@@ -21,7 +21,7 @@ from webdriver_manager.firefox import GeckoDriverManager
 
 
 def game():
-    quips = './bin/en_data/quips.json'
+    quips = './data/quips.json'
     with open(quips, "r") as file:
         line = json.load(file)
     game = str(random.choice(line['gamemsg']))
@@ -29,7 +29,7 @@ def game():
 
 
 def getad():
-    quips = './bin/en_data/quips.json'
+    quips = './data/quips.json'
     with open(quips, "r") as file:
         line = json.load(file)
     ad = str(random.choice(line['adlinks']))
@@ -37,7 +37,7 @@ def getad():
 
 
 def awake():
-    quips = './bin/en_data/quips.json'
+    quips = './data/quips.json'
     with open(quips, "r") as file:
         line = json.load(file)
     awake = str(random.choice(line['startmsg']))
@@ -60,7 +60,7 @@ async def makelink():
     return link
 
 async def activity():
-    quips = './bin/en_data/quips.json'
+    quips = './data/quips.json'
     with open(quips, "r") as file:
         line = json.load(file)
         return discord.Streaming(name=game(), url=str(random.choice(line['ytlinks'])))
@@ -70,8 +70,8 @@ def datecheck():
     today = date.today()
     # compare to flumbot birthday
     start = today - date(2019, 2, 26)
-    filename = './bin/en_data/userdata.json'
-    altfilename = './bin/en_data/longtermdata.json'
+    filename = 'data/userdata.json'
+    altfilename = './data/longtermdata.json'
     with open(altfilename, "r") as file:
         data = json.load(file)
     with open(filename, "r") as file:

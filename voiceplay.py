@@ -43,7 +43,7 @@ async def playclip(cliplocation, ctx, client, overide):
 
     print(f"Now Playing {cliplocation}")
 
-    filename = './bin/en_data/repeats.json'
+    filename = 'data/repeats.json'
     with open(filename, "r") as file:
         data = json.load(file)
 

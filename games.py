@@ -379,7 +379,7 @@ async def winnerlist(ctx, printable, mod):
 
     channel = ctx.channel
 
-    filename = './bin/en_data/userdata.json'
+    filename = 'data/userdata.json'
     with open(filename, "r") as file:
         data = json.load(file)
     msg = await channel.send(f"The correct answer was {printable}\n\nCongratulations to:\n", tts=True)
