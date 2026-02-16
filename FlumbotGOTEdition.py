@@ -567,7 +567,7 @@ async def flum(ctx, action, arg):
             link = full_url.split("/")
             full_url = "https://www.youtube.com/watch?v=" + link[4]
         if full_url in line['ytlinks']:
-            await ctx.send("Already in the list boss...", ephemeral=True, delete_after=3)
+            await ctx.channel.send("Already in the list boss...")
             return
 
         try:
@@ -575,14 +575,14 @@ async def flum(ctx, action, arg):
                 info = ydl.extract_info(full_url, download=False)
         except Exception as e:
             print(e)
-            await ctx.send("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
+            await ctx.channel.send("Sorry, I couldn't get that one boss")
             return
 
         line['ytlinks'].append(full_url)
         with open(quips, "w") as file:
             json.dump(line, file)
         msg = f"Successfully added <{full_url}> to the flum stream"
-        await ctx.send(msg)
+        await ctx.channel.send(msg)
 
     if 'mp3' in action:
         link = arg
@@ -596,11 +596,40 @@ async def flum(ctx, action, arg):
                 info = ydl.extract_info(link, download=False)
         except Exception as e:
             print(e)
-            await ctx.send("Sorry, I couldn't get that one boss", ephemeral=True, delete_after=3)
+            await ctx.channel.send("Sorry, I couldn't get that one boss")
             return
 
-        await ctx.send(f"Adding <{link}> to the queue to download!")
-        threading.Thread(target=entry, args=(link, ctx), daemon=True).start()
+        await ctx.channel.send(f"Adding <{link}> to the queue to download!")
+        threading.Thread(target=entry, args=link, daemon=True).start()
+
+async def download(link):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'cookiefile': 'cookies.txt',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([link])
+    for file in os.listdir('./'):
+        if file.endswith(".mp3"):
+            location = os.path.join("./", file)
+    try:
+        shutil.move(location, './Clips/usersub')
+    except:
+        print(f"Duplicate clip <{link}> not added")
+        for file in os.listdir("./"):
+            if file.endswith(".mp3"):
+                os.remove(file)
+        return
+    print(f"Successfully added <{link}> to user submissions folder")
+
+def entry(link, ctx):
+    asyncio.run(download(link))
+
 
 @client.hybrid_command(name='surprise', description='flumbot how scandelous of you!', pass_context=True)
 async def surprise(ctx):
@@ -612,36 +641,8 @@ async def surprise(ctx):
     else:
         link = await daystart.get_random_image_from_4chan()
     await ctx.channel.send(file=discord.File(link))
-    await ctx.channel.send(await daystart.quip_image(link))
+    await daystart.quip_image(ctx.channel, link)
     os.remove(link)
-
-async def download(link, ctx):
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'cookiefile': 'cookies.txt',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-    }
-    # with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-    #     ydl.download([link])
-    # for file in os.listdir('./'):
-    #     if file.endswith(".mp3"):
-    #         location = os.path.join("./", file)
-    # try:
-    #     shutil.move(location, './Clips/usersub')
-    # except:
-    #     print(f"Duplicate clip <{link}> not added")
-    #     for file in os.listdir("./"):
-    #         if file.endswith(".mp3"):
-    #             os.remove(file)
-    #     return
-    print(f"Successfully added <{link}> to user submissions folder")
-
-def entry(link, ctx):
-    asyncio.run(download(link, ctx))
 
 @client.event
 async def on_command_error(ctx, error):
