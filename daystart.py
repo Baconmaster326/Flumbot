@@ -223,13 +223,6 @@ async def get_random_image_from_4chan():
         return None
 
 
-async def quip_image(channel, link):
-    image = Image.open(link)
-    await generativeai.quip_this(channel, "", image)
-    image.close()
-    return
-
-
 async def get_refresh_token():
     # check if we already have the token generated
     with open("token.json", "r") as f:

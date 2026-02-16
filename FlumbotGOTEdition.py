@@ -86,7 +86,7 @@ async def on_ready():
         #send random reddit, 4chin, or pixiv link
         link = await daystart.makelink()
         await channel.send(file=discord.File(link))
-        await daystart.quip_image(channel, link)
+        await generativeai.quip_this(channel, "", link)
         os.remove(link)
      
 
