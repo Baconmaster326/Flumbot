@@ -10,6 +10,7 @@ dependencies = [
     "google-generativeai>=0.8.6",
     "gppt>=4.3.0",
     "librosa>=0.11.0",
+    "ollama>=0.6.1",
     "pillow>=12.1.1",
     "psutil>=7.2.2",
     "selenium>=4.40.0",
