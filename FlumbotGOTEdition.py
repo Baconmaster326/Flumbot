@@ -491,7 +491,7 @@ async def flum(ctx, action, arg):
         with open(quips, "w") as file:
             json.dump(line, file)
         msg = f"Succesfully added {arg} to flavortext list!"
-        await ctx.send(msg)
+        await ctx.channel.send(msg)
         return
 
     if 'awake' in action:
@@ -502,7 +502,7 @@ async def flum(ctx, action, arg):
             await ctx.send("Successfully added your rule!")
         else:
             msg = f"Successfully added {arg} to the startup messages list!"
-            await ctx.send(msg)
+            await ctx.channel.send(msg)
         return
 
     if 'name' in action:
@@ -510,14 +510,14 @@ async def flum(ctx, action, arg):
         with open(quips, "w") as file:
             json.dump(line, file)
         msg = f"Successfully added {arg} to the flumbot response list!"
-        await ctx.send(msg)
+        await ctx.channel.send(msg)
 
     if 'bet' in action:
         line['betmsg'].append(arg)
         with open(quips, "w") as file:
             json.dump(line, file)
         msg = f"Successfully added {arg} to the bet list!"
-        await ctx.send(msg)
+        await ctx.channel.send(msg)
         return
 
     if 'ad' in action:
@@ -525,15 +525,15 @@ async def flum(ctx, action, arg):
         with open(quips, "w") as file:
             json.dump(line, file)
         msg = f"Successfully added <{arg}> to the list of ads"
-        await ctx.send(msg)
+        await ctx.channel.send(msg)
         return
 
     if 'purge' in action:
         newlist = []
-        await ctx.send("Starting purge...")
+        await ctx.channel.send("Starting purge...")
         for each in line['ytlinks']:
             if ('user' in each) or ('twitch' in each) or ('youtu.be' in each):
-                await ctx.send("Purged video... " + str(each))
+                await ctx.channel.send("Purged video... " + str(each))
                 continue
             ydl_opts = {
                 'cookiefile': 'cookies.txt'
@@ -543,13 +543,13 @@ async def flum(ctx, action, arg):
                     info = ydl.extract_info(each, download=False)
             except Exception as e:
                 print(e)
-                await ctx.send("Purged video..." + str(each))
+                await ctx.channel.send("Purged video..." + str(each))
                 continue
             newlist.append(each)
         line['ytlinks'] = newlist
         with open(quips, "w") as file:
             json.dump(line, file)
-        await ctx.send("COMPLETED PURGE")
+        await ctx.channel.send("COMPLETED PURGE")
         print("done")
 
 
