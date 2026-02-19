@@ -600,7 +600,7 @@ async def flum(ctx, action, arg):
             return
 
         await ctx.channel.send(f"Adding <{link}> to the queue to download!")
-        threading.Thread(target=entry, args=link, daemon=True).start()
+        threading.Thread(target=entry, args=(link,), daemon=True).start()
 
 async def download(link):
     ydl_opts = {
@@ -627,7 +627,7 @@ async def download(link):
         return
     print(f"Successfully added <{link}> to user submissions folder")
 
-def entry(link, ctx):
+def entry(link):
     asyncio.run(download(link))
 
 
