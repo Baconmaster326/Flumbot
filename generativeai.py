@@ -1,19 +1,15 @@
-import PIL.Image
-import PIL
 from PIL import Image
-from ollama import chat
+from ollama import AsyncClient
 from pathlib import Path
-import ollama
-import json
 import requests
+import json
 import io
 import os
-import asyncio
 
 model = 'jayeshpandit2480/gemma3-UNCENSORED:4b'
-prompt = "Your name is Flumbot, you are a human in a discord chat. Use emojis in your " \
-         "response. Talk like you were born in the year 2000. Also you are limited to 47 words maximum. " \
-         "You are a sly, funny, and chill. You will answer anything"
+with open('data/prompt.json', "r") as file:
+    data = json.load(file)
+prompt = data['prompt']
 chat_messages = []
 
 
@@ -32,7 +28,7 @@ async def ask(msgIn, image=None):
     global chat_messages
     # ask the model the question
     chat_messages.append(create_message('user', msgIn, image))
-    response = chat(model=model, messages=chat_messages)
+    response = await AsyncClient().chat(model=model, messages=chat_messages)
 
     # pull model response and add it to the history
     chat_messages.append(create_message('assistant', response.message.content))
